@@ -6,7 +6,8 @@ Die Addressen der Contracts sind [hier](https://github.com/WunderPass/SmartContr
 ## User Journey
 
 1. Create Pool
-   CONTRACT: PoolLauncher
+
+CONTRACT: PoolLauncher
 
 ```solidity
 function createNewPool(string poolName, uint256 entryBarrier, string tokenName, string tokenSymbol, uint256 tokenPrice, address creator)
@@ -23,7 +24,8 @@ event PoolLaunched(address poolAddress, string name, address governanceTokenAddr
 ```
 
 2. Join Pool
-   CONTRACT: WunderPool
+
+CONTRACT: WunderPool
 
 ```solidity
 function joinForUser(uint256 amount, address user)
@@ -39,7 +41,8 @@ event NewMember(address memberAddress, uint256 stake)
 ```
 
 3. Invite User
-   CONTRACT: WunderPool
+
+CONTRACT: WunderPool
 
 ```solidity
 function addToWhiteListForUser(address user, address newMember, bytes signature)
@@ -54,7 +57,8 @@ sign(user, WunderPoolAddress, newMember)
 ```
 
 4. Create Proposal
-   CONTRACT: WunderPool
+
+CONTRACT: WunderPool
 
 ```solidity
 function createProposalForUser(address user, string title, string description, address[] contractAddresses, string[] actions, bytes[] params, uint256[] transactionValues, uint256 deadline, bytes signature)
@@ -83,7 +87,8 @@ event NewProposal(uint256 id, address creator, string title)
 ```
 
 5. Vote
-   CONTRACT: WunderPool
+
+CONTRACT: WunderPool
 
 ```solidity
 function voteForUser(address user, uint256 proposalId, uint256 mode, bytes signature)
@@ -106,7 +111,8 @@ event Voted(uint256 proposalId, address voter, uint256 mode)
 ```
 
 6. Execute Proposal
-   CONTRACT: WunderPool
+
+CONTRACT: WunderPool
 
 ```solidity
 function executeProposal(uint256 proposalId)
