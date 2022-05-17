@@ -5,7 +5,7 @@ Die Addressen der Contracts sind [hier](https://github.com/WunderPass/SmartContr
 
 ## User Journey
 
-1. Create Pool
+### 1. Create Pool
 
 **CONTRACT: PoolLauncher**
 
@@ -23,7 +23,7 @@ Folgendes Event wird emitted:
 event PoolLaunched(address poolAddress, string name, address governanceTokenAddress, string governanceTokenName, uint256 entryBarrier)
 ```
 
-2. Join Pool
+### 2. Join Pool
 
 **CONTRACT: WunderPool**
 
@@ -40,7 +40,7 @@ Folgendes Event wird emitted:
 event NewMember(address memberAddress, uint256 stake)
 ```
 
-3. Invite User
+### 3. Invite User
 
 **CONTRACT: WunderPool**
 
@@ -56,7 +56,7 @@ Die Signatur setzt sich zusammen aus:
 sign(user, WunderPoolAddress, newMember)
 ```
 
-4. Create Proposal
+### 4. Create Proposal
 
 **CONTRACT: WunderPool**
 
@@ -86,7 +86,7 @@ Folgendes Event wird emitted:
 event NewProposal(uint256 id, address creator, string title)
 ```
 
-5. Vote
+### 5. Vote
 
 **CONTRACT: WunderPool**
 
@@ -110,7 +110,7 @@ Folgendes Event wird emitted:
 event Voted(uint256 proposalId, address voter, uint256 mode)
 ```
 
-6. Execute Proposal
+### 6. Execute Proposal
 
 **CONTRACT: WunderPool**
 
