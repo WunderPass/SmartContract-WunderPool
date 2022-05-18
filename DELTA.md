@@ -9,7 +9,7 @@ Einige Fuktionen (z.B. `voteForUser()`) benötigen eine Signatur als Parameter. 
 
 ### Javascript (ethers.js)
 
-In JavaScript you can sign messages with the following function:
+In JavaScript kann `sign()` und `signPacked()` mit der folgenden Funktion ausgeführt werden:
 
 ```js
 async function signMessage(signer, types, params, packed = true) {
