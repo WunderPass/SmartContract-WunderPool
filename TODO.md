@@ -1,10 +1,5 @@
 # WunderPool
 
-- transaction.from ??? Can we pay for the Gas Fees and Value? So the user does not have to have MATIC
-
-  - Set transaction.from = user.address
-  - Let the user sign the message
-
 - Deadline Minimum?
 
   - Members should have enough time to vote
@@ -27,8 +22,6 @@
 
 - Proposal should store the creator
 
-- Use Proxy contracts
-
 - Remove Proposals that did not follow through
 
 - require(proposal.value <= maxSpendingThreshold, "Execution not permitted: Proposal exceeds max spending Limit");
@@ -45,11 +38,20 @@
   1. If new constructor params are required, ask with a popup
 
 - WunderSwapper getUsdcPriceOf
+
 - WunderSwapper getBestPath => Manchmal ist der USDC Path nicht der beste. Check liquidity of pair oder price und wähle den besten
 
-NFTs need to be removable from the pool
-
 **_TESTING_**
+
+- WunderSwapper function sellAllTokens(tokenAddress) => check balanceOf(msg.sender)
+
+- WunderSwapper function swapAllTokens(tokenAddress) => check balanceOf(msg.sender)
+
+- WunderSwapper Swap Tokens that don't have a QuickSwap Pair
+
+**_DONE_**
+
+- NFTs need to be removable from the pool
 
 - MEMBERS MUST BE UNIQUE!!! (Currently Members can be added twice...)
 
@@ -62,19 +64,14 @@ NFTs need to be removable from the pool
   - Im UI: Button, um NFT abzukaufen: Multi Proposal -> user.send(1 MATIC) => Pool, NFT.transfer(ueser, 1)
   - SelfDestruct: Auslosen wer einen NFT bekommt?
 
-- WunderSwapper function sellAllTokens(tokenAddress) => check balanceOf(msg.sender)
-
-- WunderSwapper function swapAllTokens(tokenAddress) => check balanceOf(msg.sender)
-
-- WunderSwapper Swap Tokens that don't have a QuickSwap Pair
-
 - Block Users from joining the Pool after first trade
 
 - Detach Smart Contract Transactions from User by moving everything into the backend
+
   - JoinForUser
   - VoteForUser
 
-**_DONE_**
+- Use Proxy contracts
 
 - destruct function
 

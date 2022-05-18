@@ -4,36 +4,54 @@ pragma solidity ^0.8.9;
 
 import "./WunderVaultDelta.sol";
 
-interface IPoolLauncherDelta {
+interface IPoolLauncher {
     function addPoolToMembersPools(address _pool, address _member) external;
 
     function removePoolFromMembersPools(address _pool, address _member)
         external;
+
+    function wunderProposal() external view returns (address);
+}
+
+interface WunderProposal {
+    function createProposal(
+        address creator,
+        uint256 proposalId,
+        string memory title,
+        string memory description,
+        address[] memory contractAddresses,
+        string[] memory actions,
+        bytes[] memory params,
+        uint256[] memory transactionValues,
+        uint256 deadline
+    ) external;
+
+    function vote(
+        uint256 _proposalId,
+        uint256 _mode,
+        address _voter
+    ) external;
+
+    function proposalExecutable(address _pool, uint256 _proposalId)
+        external
+        view
+        returns (bool executable, string memory errorMessage);
+
+    function setProposalExecuted(uint256 _proposalId) external;
+
+    function getProposalTransactions(address _pool, uint256 _proposalId)
+        external
+        view
+        returns (
+            string[] memory actions,
+            bytes[] memory params,
+            uint256[] memory transactionValues,
+            address[] memory contractAddresses
+        );
 }
 
 contract WunderPoolDelta is WunderVaultDelta {
-    enum VoteType {
-        None,
-        For,
-        Against
-    }
-
-    struct Proposal {
-        string title;
-        string description;
-        address[] contractAddresses;
-        string[] actions;
-        bytes[] params;
-        uint256[] transactionValues;
-        uint256 deadline;
-        address[] yesVoters;
-        address[] noVoters;
-        uint256 createdAt;
-        bool executed;
-        mapping(address => VoteType) hasVoted;
-    }
-
-    mapping(uint256 => Proposal) public proposals;
+    address public wunderProposal;
     uint256[] public proposalIds;
 
     address[] public whiteList;
@@ -47,11 +65,6 @@ contract WunderPoolDelta is WunderVaultDelta {
     uint256 public entryBarrier;
 
     bool public poolClosed = false;
-
-    modifier onlyMember() {
-        require(isMember(msg.sender), "Not a Member");
-        _;
-    }
 
     modifier exceptPool() {
         require(msg.sender != address(this));
@@ -80,203 +93,123 @@ contract WunderPoolDelta is WunderVaultDelta {
         address _launcher,
         address _governanceToken,
         uint256 _entryBarrier,
-        address creator
+        address _creator
     ) WunderVaultDelta(_governanceToken) {
         name = _name;
         launcherAddress = _launcher;
         entryBarrier = _entryBarrier;
-        addToWhiteList(creator);
+        whiteList.push(_creator);
+        whiteListLookup[_creator] = true;
         addToken(USDC, false, 0);
     }
 
     receive() external payable {}
 
-    function createProposal(
-        string memory _title,
-        string memory _description,
-        address _contractAddress,
-        string memory _action,
-        bytes memory _param,
-        uint256 _transactionValue,
-        uint256 _deadline
-    ) public onlyMember {
-        address[] memory _contractAddresses = new address[](1);
-        _contractAddresses[0] = _contractAddress;
-        string[] memory _actions = new string[](1);
-        _actions[0] = _action;
-        bytes[] memory _params = new bytes[](1);
-        _params[0] = _param;
-        uint256[] memory _transactionValues = new uint256[](1);
-        _transactionValues[0] = _transactionValue;
-
-        createMultiActionProposal(
-            _title,
-            _description,
-            _contractAddresses,
-            _actions,
-            _params,
-            _transactionValues,
-            _deadline
-        );
-    }
-
-    function createMultiActionProposal(
+    function createProposalForUser(
+        address _user,
         string memory _title,
         string memory _description,
         address[] memory _contractAddresses,
         string[] memory _actions,
         bytes[] memory _params,
         uint256[] memory _transactionValues,
-        uint256 _deadline
-    ) public onlyMember {
-        require(
-            _contractAddresses.length == _actions.length &&
-                _actions.length == _params.length &&
-                _params.length == _transactionValues.length,
-            "Inconsistent amount of transactions"
-        );
-        require(bytes(_title).length > 0, "Missing Title");
-        require(_deadline > block.timestamp, "Invalid Deadline");
-
-        for (uint256 index = 0; index < _contractAddresses.length; index++) {
-            require(_contractAddresses[index] != address(0), "Missing Address");
-            require(bytes(_actions[index]).length > 0, "Missing Action");
-        }
-
+        uint256 _deadline,
+        bytes memory _signature
+    ) public {
         uint256 nextProposalId = proposalIds.length;
         proposalIds.push(nextProposalId);
 
-        Proposal storage newProposal = proposals[nextProposalId];
-        newProposal.title = _title;
-        newProposal.description = _description;
-        newProposal.actions = _actions;
-        newProposal.params = _params;
-        newProposal.transactionValues = _transactionValues;
-        newProposal.contractAddresses = _contractAddresses;
-        newProposal.deadline = _deadline;
-        newProposal.createdAt = block.timestamp;
-        newProposal.executed = false;
+        bytes32 message = prefixed(
+            keccak256(
+                abi.encode(
+                    _user,
+                    address(this),
+                    _title,
+                    _description,
+                    _contractAddresses,
+                    _actions,
+                    _params,
+                    _transactionValues,
+                    _deadline,
+                    nextProposalId
+                )
+            )
+        );
+
+        require(
+            recoverSigner(message, _signature) == _user,
+            "Invalid Signature"
+        );
+        require(isMember(_user), "Only Members can create Proposals");
+
+        WunderProposal(IPoolLauncher(launcherAddress).wunderProposal())
+            .createProposal(
+                _user,
+                nextProposalId,
+                _title,
+                _description,
+                _contractAddresses,
+                _actions,
+                _params,
+                _transactionValues,
+                _deadline
+            );
 
         emit NewProposal(nextProposalId, msg.sender, _title);
     }
 
-    function hasVoted(uint256 proposalId, address account)
-        public
-        view
-        returns (VoteType)
-    {
-        return proposals[proposalId].hasVoted[account];
-    }
-
-    // prefix is most likely "\x19Ethereum Signed Message:\n32"
     function voteForUser(
+        address _user,
         uint256 _proposalId,
         uint256 _mode,
-        bytes32 msgHash,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
+        bytes memory _signature
     ) public {
-        address user = ecrecover(msgHash, v, r, s);
-        _vote(_proposalId, _mode, user);
-    }
-
-    function vote(uint256 _proposalId, uint256 _mode) public {
-        _vote(_proposalId, _mode, msg.sender);
-    }
-
-    function _vote(
-        uint256 _proposalId,
-        uint256 _mode,
-        address _voter
-    ) internal {
-        require(isMember(_voter));
-        Proposal storage proposal = proposals[_proposalId];
-        require(proposal.actions.length > 0, "Does not exist");
-        require(
-            block.timestamp <= proposal.deadline,
-            "Voting period has ended"
-        );
-        require(
-            hasVoted(_proposalId, _voter) == VoteType.None,
-            "Already voted"
+        bytes32 message = prefixed(
+            keccak256(
+                abi.encodePacked(_user, address(this), _proposalId, _mode)
+            )
         );
 
-        if (_mode == uint8(VoteType.Against)) {
-            proposal.hasVoted[_voter] = VoteType.Against;
-            proposal.noVoters.push(_voter);
-        } else if (_mode == uint8(VoteType.For)) {
-            proposal.hasVoted[_voter] = VoteType.For;
-            proposal.yesVoters.push(_voter);
-        } else {
-            revert("Invalid VoteType (1=YES, 2=NO)");
-        }
-        emit Voted(_proposalId, _voter, _mode);
-    }
-
-    function calculateVotes(uint256 _proposalId)
-        public
-        view
-        returns (uint256 yesVotes, uint256 noVotes)
-    {
-        Proposal storage proposal = proposals[_proposalId];
-        uint256 yes;
-        uint256 no;
-        for (uint256 i = 0; i < proposal.noVoters.length; i++) {
-            no += governanceTokensOf(proposal.noVoters[i]);
-        }
-        for (uint256 i = 0; i < proposal.yesVoters.length; i++) {
-            yes += governanceTokensOf(proposal.yesVoters[i]);
-        }
-        return (yes, no);
+        require(
+            recoverSigner(message, _signature) == _user,
+            "Invalid Signature"
+        );
+        WunderProposal(IPoolLauncher(launcherAddress).wunderProposal()).vote(
+            _proposalId,
+            _mode,
+            _user
+        );
+        emit Voted(_proposalId, _user, _mode);
     }
 
     function executeProposal(uint256 _proposalId) public {
         poolClosed = true;
-        Proposal storage proposal = proposals[_proposalId];
-        require(proposal.actions.length > 0, "Does not exist");
-        require(!proposal.executed, "Already executed");
-        (uint256 yesVotes, uint256 noVotes) = calculateVotes(_proposalId);
-        require(
-            (noVotes * 2) <= totalGovernanceTokens(),
-            "Majority voted against execution"
-        );
-        require(
-            (yesVotes * 2) > totalGovernanceTokens() ||
-                proposal.deadline <= block.timestamp,
-            "Voting still allowed"
-        );
+        (bool executable, string memory errorMessage) = WunderProposal(
+            IPoolLauncher(launcherAddress).wunderProposal()
+        ).proposalExecutable(address(this), _proposalId);
+        require(executable, errorMessage);
+        WunderProposal(IPoolLauncher(launcherAddress).wunderProposal())
+            .setProposalExecuted(_proposalId);
+        (
+            string[] memory actions,
+            bytes[] memory params,
+            uint256[] memory transactionValues,
+            address[] memory contractAddresses
+        ) = WunderProposal(IPoolLauncher(launcherAddress).wunderProposal())
+                .getProposalTransactions(address(this), _proposalId);
+        bytes[] memory results = new bytes[](contractAddresses.length);
 
-        uint256 transactionTotal = 0;
-        for (
-            uint256 index = 0;
-            index < proposal.transactionValues.length;
-            index++
-        ) {
-            transactionTotal += proposal.transactionValues[index];
-        }
-
-        require(transactionTotal <= address(this).balance, "Not enough funds");
-
-        proposal.executed = true;
-
-        bytes[] memory results = new bytes[](proposal.contractAddresses.length);
-
-        for (
-            uint256 index = 0;
-            index < proposal.contractAddresses.length;
-            index++
-        ) {
-            address contractAddress = proposal.contractAddresses[index];
+        for (uint256 index = 0; index < contractAddresses.length; index++) {
+            address contractAddress = contractAddresses[index];
             bytes memory callData = bytes.concat(
-                abi.encodeWithSignature(proposal.actions[index]),
-                proposal.params[index]
+                abi.encodeWithSignature(actions[index]),
+                params[index]
             );
 
             bool success = false;
             bytes memory result;
             (success, result) = contractAddress.call{
-                value: proposal.transactionValues[index]
+                value: transactionValues[index]
             }(callData);
             require(success, "Execution failed");
             results[index] = result;
@@ -285,46 +218,23 @@ contract WunderPoolDelta is WunderVaultDelta {
         emit ProposalExecuted(_proposalId, msg.sender, results);
     }
 
-    function joinPool(uint256 amount) public {
-        require(!poolClosed);
+    function joinForUser(uint256 _amount, address _user) public exceptPool {
+        require(!poolClosed, "Pool Closed");
         require(
-            (amount >= entryBarrier && amount >= governanceTokenPrice()),
+            (_amount >= entryBarrier && _amount >= governanceTokenPrice()),
             "Increase Stake"
         );
         require(
-            ERC20Interface(USDC).transferFrom(
-                msg.sender,
-                address(this),
-                amount
-            ),
+            ERC20Interface(USDC).transferFrom(_user, address(this), _amount),
             "USDC Transfer failed"
         );
-        addMember(msg.sender);
-        _issueGovernanceTokens(msg.sender, amount);
-        emit NewMember(msg.sender, amount);
-    }
-
-    function joinForUser(uint256 amount, address user) public exceptPool {
-        require(!poolClosed);
-        require(
-            (amount >= entryBarrier && amount >= governanceTokenPrice()),
-            "Increase Stake"
-        );
-        require(
-            ERC20Interface(USDC).transferFrom(
-                msg.sender,
-                address(this),
-                amount
-            ),
-            "USDC Transfer failed"
-        );
-        addMember(user);
-        _issueGovernanceTokens(user, amount);
-        emit NewMember(user, amount);
+        addMember(_user);
+        _issueGovernanceTokens(_user, _amount);
+        emit NewMember(_user, _amount);
     }
 
     function fundPool(uint256 amount) external exceptPool {
-        require(!poolClosed);
+        require(!poolClosed, "Pool Closed");
         require(
             ERC20Interface(USDC).transferFrom(
                 msg.sender,
@@ -341,17 +251,31 @@ contract WunderPoolDelta is WunderVaultDelta {
         require(isWhiteListed(_newMember), "Not On Whitelist");
         members.push(_newMember);
         memberLookup[_newMember] = true;
-        IPoolLauncherDelta(launcherAddress).addPoolToMembersPools(
+        IPoolLauncher(launcherAddress).addPoolToMembersPools(
             address(this),
             _newMember
         );
     }
 
-    function addToWhiteList(address _newMember) public onlyMember {
+    function addToWhiteListForUser(
+        address _user,
+        address _newMember,
+        bytes memory _signature
+    ) public {
+        require(isMember(_user), "Only Members can Invite new Users");
+        bytes32 message = prefixed(
+            keccak256(abi.encodePacked(_user, address(this), _newMember))
+        );
+
+        require(
+            recoverSigner(message, _signature) == _user,
+            "Invalid Signature"
+        );
+
         if (!isWhiteListed(_newMember)) {
             whiteList.push(_newMember);
             whiteListLookup[_newMember] = true;
-            IPoolLauncherDelta(launcherAddress).addPoolToMembersPools(
+            IPoolLauncher(launcherAddress).addPoolToMembersPools(
                 address(this),
                 _newMember
             );
@@ -374,63 +298,48 @@ contract WunderPoolDelta is WunderVaultDelta {
         return proposalIds;
     }
 
-    function getProposal(uint256 _proposalId)
-        public
-        view
-        returns (
-            string memory title,
-            string memory description,
-            uint256 transactionCount,
-            uint256 deadline,
-            uint256 yesVotes,
-            uint256 noVotes,
-            uint256 totalVotes,
-            uint256 createdAt,
-            bool executed
-        )
-    {
-        Proposal storage proposal = proposals[_proposalId];
-        (uint256 yes, uint256 no) = calculateVotes(_proposalId);
-        return (
-            proposal.title,
-            proposal.description,
-            proposal.actions.length,
-            proposal.deadline,
-            yes,
-            no,
-            totalGovernanceTokens(),
-            proposal.createdAt,
-            proposal.executed
-        );
-    }
-
-    function getProposalTransaction(
-        uint256 _proposalId,
-        uint256 _transactionIndex
-    )
-        public
-        view
-        returns (
-            string memory action,
-            bytes memory param,
-            uint256 transactionValue,
-            address contractAddress
-        )
-    {
-        Proposal storage proposal = proposals[_proposalId];
-        return (
-            proposal.actions[_transactionIndex],
-            proposal.params[_transactionIndex],
-            proposal.transactionValues[_transactionIndex],
-            proposal.contractAddresses[_transactionIndex]
-        );
-    }
-
     function liquidatePool() public onlyPool {
         _distributeFullBalanceOfAllTokensEvenly(members);
         _distributeAllMaticEvenly(members);
         _distributeAllNftsEvenly(members);
         _destroyGovernanceToken();
         selfdestruct(payable(msg.sender));
+    }
+
+    function splitSignature(bytes memory sig)
+        internal
+        pure
+        returns (
+            uint8 v,
+            bytes32 r,
+            bytes32 s
+        )
+    {
+        require(sig.length == 65);
+
+        assembly {
+            r := mload(add(sig, 32))
+            s := mload(add(sig, 64))
+            v := byte(0, mload(add(sig, 96)))
+        }
+
+        return (v, r, s);
+    }
+
+    function recoverSigner(bytes32 message, bytes memory sig)
+        internal
+        pure
+        returns (address)
+    {
+        (uint8 v, bytes32 r, bytes32 s) = splitSignature(sig);
+
+        return ecrecover(message, v, r, s);
+    }
+
+    function prefixed(bytes32 hash) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
+            );
     }
 }

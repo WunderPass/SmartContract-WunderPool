@@ -7,8 +7,8 @@ async function main() {
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${balance.toString()}`);
 
-  const WunderSwapper = await ethers.getContractFactory('WunderSwapperDelta');
-  const contract = await WunderSwapper.deploy();
+  const WunderProposal = await ethers.getContractFactory('WunderProposalDelta');
+  const contract = await WunderProposal.deploy();
   console.log(`Token address: ${contract.address}`);
 
   const contractData = {
@@ -17,7 +17,7 @@ async function main() {
   };
 
   fs.writeFileSync(
-    'deployed/WunderSwapperDelta.json',
+    'deployed/WunderProposalDelta.json',
     JSON.stringify(contractData)
   );
 }

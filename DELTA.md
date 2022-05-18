@@ -3,6 +3,31 @@
 Dies ist die Dokumentation für die WunderPool Smart Contracts.
 Die Addressen der Contracts sind [hier](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/README.md) aufgelistet.
 
+## Signieren
+
+Einige Fuktionen (z.B. `voteForUser()`) benötigen eine Signatur als Parameter. In Solidity gibt es zwei Möglichkeiten, Signaturen zu überprüfen: `abi.encode()` und `abi.encodePacked()`. Da `abi.encodePacked()` nicht mit string[] oder byte[] funktioniert, musste bei `createProposalForUser()` auf `abi.encode()` zurückgegriffen werden. In dieser Dokumentation wird unterschieden zwischen `sign()` und `signPacked()`.
+
+### Javascript (ethers.js)
+
+In JavaScript you can sign messages with the following function:
+
+```js
+async function signMessage(signer, types, params, packed = true) {
+  let message;
+  if (packed) {
+    // signPacked()
+    message = ethers.utils.solidityKeccak256(types, params);
+  } else {
+    // sign()
+    message = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(types, params)
+    );
+  }
+  const bytes = ethers.utils.arrayify(message);
+  return await signer.signMessage(bytes);
+}
+```
+
 ## User Journey
 
 ### 1. Create Pool
@@ -53,7 +78,7 @@ Die `user` Adresse ist die des Einladenden Users, der ein Pool Mitglied sein mus
 Die Signatur setzt sich zusammen aus:
 
 ```
-sign(user, WunderPoolAddress, newMember)
+signPacked(user, WunderPoolAddress, newMember)
 ```
 
 ### 4. Create Proposal
@@ -101,7 +126,7 @@ Der `mode` kann 1 (YES) oder 2 (NO) sein.
 Die Signatur setzt sich zusammen aus:
 
 ```
-sign(user, WunderPoolAddress, proposalId, mode)
+signPacked(user, WunderPoolAddress, proposalId, mode)
 ```
 
 Folgendes Event wird emitted:
@@ -212,10 +237,34 @@ Gibt alle Pool Adressen aus, in denen ein `member` gewhitelisted ist, also denen
 
 ### WunderPool Contract
 
+#### Name of the Pool
+
+```solidity
+function name() returns(string)
+```
+
+Gibt den Namen des Pools aus.
+
+#### Entry Barrier of the Pool
+
+```solidity
+function entryBarrier() returns(uint256)
+```
+
+Gibt die Eintrittsbarriere des Pools in USDC (1.000.000 = 1$) aus.
+
+#### Pool is closed?
+
+```solidity
+function poolClosed() returns(bool)
+```
+
+Gibt aus, ob der Beitritt in den Pool noch möglich ist. Wird `false`, sobald das erste Proposal ausgeführt wurde.
+
 #### Members of a Pool
 
 ```solidity
-function poolMembers() public view returns (address[]) {
+function poolMembers() public view returns (address[])
 ```
 
 Gibt die Adressen aller Pool Mitglieder aus.
@@ -223,7 +272,7 @@ Gibt die Adressen aller Pool Mitglieder aus.
 #### User is Member
 
 ```solidity
-function isMember(address maybeMember) public view returns (bool) {
+function isMember(address maybeMember) public view returns (bool)
 ```
 
 Gibt aus, ob ein `maybeMember` Mitglied in einem Pool ist.
@@ -231,7 +280,7 @@ Gibt aus, ob ein `maybeMember` Mitglied in einem Pool ist.
 #### User is White Listed
 
 ```solidity
-function isWhiteListed(address user) public view returns (bool) {
+function isWhiteListed(address user) public view returns (bool)
 ```
 
 Gibt aus, ob ein `user` eingeladen ist, dem Pool beizutreten.
@@ -239,7 +288,7 @@ Gibt aus, ob ein `user` eingeladen ist, dem Pool beizutreten.
 #### All Proposal Ids
 
 ```solidity
-function getAllProposalIds() public view returns (uint256[]) {
+function getAllProposalIds() public view returns (uint256[])
 ```
 
 Gibt ein Array aller proposalIds aus.

@@ -7,6 +7,8 @@ import "./PoolGovernanceTokenDelta.sol";
 
 contract PoolLauncherDelta {
     address public USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+    address public wunderProposal;
+
     address[] public launchedPools;
 
     mapping(address => address[]) public memberPools;
@@ -19,6 +21,10 @@ contract PoolLauncherDelta {
         string governanceTokenName,
         uint256 entryBarrier
     );
+
+    constructor(address _wunderProposal) {
+        wunderProposal = _wunderProposal;
+    }
 
     function createNewPool(
         string memory _poolName,
@@ -40,6 +46,7 @@ contract PoolLauncherDelta {
             _entryBarrier,
             _creator
         );
+        whiteListedPools[_creator].push(address(newPool));
         newToken.setPoolAddress(address(newPool));
         launchedPools.push(address(newPool));
         emit PoolLaunched(

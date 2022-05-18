@@ -16,7 +16,7 @@ interface ERC20Interface {
 }
 
 interface ERC721Interface {
-    function ownerOf(uint256 tokenId) external view returns (bool);
+    function ownerOf(uint256 tokenId) external view returns (address);
 }
 
 interface IGovernanceToken {
@@ -85,7 +85,10 @@ contract WunderVaultDelta {
             if (ownedNftLookup[_tokenAddress].length == 0) {
                 ownedNftAddresses.push(_tokenAddress);
             }
-            if (ERC721Interface(_tokenAddress).ownerOf(_tokenId)) {
+            if (
+                ERC721Interface(_tokenAddress).ownerOf(_tokenId) ==
+                address(this)
+            ) {
                 ownedNftLookup[_tokenAddress].push(_tokenId);
             }
         } else if (!ownedTokenLookup[_tokenAddress]) {
@@ -93,6 +96,20 @@ contract WunderVaultDelta {
             ownedTokenLookup[_tokenAddress] = true;
         }
         emit TokenAdded(_tokenAddress, _isERC721, _tokenId);
+    }
+
+    function removeNft(address _tokenAddress, uint256 _tokenId) public {
+        if (ERC721Interface(_tokenAddress).ownerOf(_tokenId) != address(this)) {
+            for (uint256 i = 0; i < ownedNftLookup[_tokenAddress].length; i++) {
+                if (ownedNftLookup[_tokenAddress][i] == _tokenId) {
+                    delete ownedNftLookup[_tokenAddress][i];
+                    ownedNftLookup[_tokenAddress][i] = ownedNftLookup[
+                        _tokenAddress
+                    ][ownedNftLookup[_tokenAddress].length - 1];
+                    ownedNftLookup[_tokenAddress].pop();
+                }
+            }
+        }
     }
 
     function getOwnedTokenAddresses() public view returns (address[] memory) {
@@ -116,29 +133,35 @@ contract WunderVaultDelta {
         address[] memory _receivers
     ) public onlyPool {
         for (uint256 i = 0; i < ownedNftLookup[_tokenAddress].length; i++) {
-            uint256 sum = 0;
-            uint256 randomNumber = uint256(
-                keccak256(
-                    abi.encode(
-                        _tokenAddress,
-                        ownedNftLookup[_tokenAddress][i],
-                        block.timestamp
-                    )
-                )
-            ) % totalGovernanceTokens();
-            for (uint256 j = 0; j < _receivers.length; j++) {
-                sum += governanceTokensOf(_receivers[j]);
-                if (sum >= randomNumber) {
-                    (bool success, ) = _tokenAddress.call(
-                        abi.encodeWithSignature(
-                            "safeTransferFrom(address,address,uint256)",
-                            address(this),
-                            _receivers[j],
-                            ownedNftLookup[_tokenAddress][i]
+            if (
+                ERC721Interface(_tokenAddress).ownerOf(
+                    ownedNftLookup[_tokenAddress][i]
+                ) == address(this)
+            ) {
+                uint256 sum = 0;
+                uint256 randomNumber = uint256(
+                    keccak256(
+                        abi.encode(
+                            _tokenAddress,
+                            ownedNftLookup[_tokenAddress][i],
+                            block.timestamp
                         )
-                    );
-                    require(success, "Transfer failed");
-                    break;
+                    )
+                ) % totalGovernanceTokens();
+                for (uint256 j = 0; j < _receivers.length; j++) {
+                    sum += governanceTokensOf(_receivers[j]);
+                    if (sum >= randomNumber) {
+                        (bool success, ) = _tokenAddress.call(
+                            abi.encodeWithSignature(
+                                "transferFrom(address,address,uint256)",
+                                address(this),
+                                _receivers[j],
+                                ownedNftLookup[_tokenAddress][i]
+                            )
+                        );
+                        require(success, "Transfer failed");
+                        break;
+                    }
                 }
             }
         }
