@@ -161,14 +161,6 @@ event ProposalExecuted(uint256 proposalId, address executor, bytes[] result)
 
 Die `pool` Adresse in allen folgenden Funktionen ist die Adresse des WunderPools, für den man die Informationen haben möchte.
 
-#### Get Proposal Count
-
-```solidity
-function getProposalCount(address pool) returns (uint256 proposalCount)
-```
-
-Gibt die Anzahl an Proposals für einen Pool aus.
-
 #### Get Proposal
 
 ```solidity
