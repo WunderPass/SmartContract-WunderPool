@@ -99,6 +99,15 @@ contract WunderSwapperDelta {
         return getAmounts(_amount, path)[1];
     }
 
+    function getPriceWithPath(uint256 _amount, address[] memory _path)
+        public
+        view
+        returns (uint256 matic)
+    {
+        uint256[] memory amounts = getAmounts(_amount, _path);
+        return amounts[amounts.length - 1];
+    }
+
     function getPriceOf(
         address _tokenIn,
         address _tokenOut,
@@ -107,6 +116,15 @@ contract WunderSwapperDelta {
         address[] memory path = new address[](2);
         path[0] = _tokenIn;
         path[1] = _tokenOut;
+        return getAmounts(_amount, path)[1];
+    }
+
+    function getBestPriceOf(
+        address _tokenIn,
+        address _tokenOut,
+        uint256 _amount
+    ) public view returns (uint256 matic) {
+        address[] memory path = getPathFor(_tokenIn, _tokenOut, _amount);
         return getAmounts(_amount, path)[1];
     }
 
@@ -151,10 +169,11 @@ contract WunderSwapperDelta {
         sellTokens(_tokenAddress, balance);
     }
 
-    function swapTokens(
+    function swapTokensWithPath(
         address _tokenIn,
         address _tokenOut,
-        uint256 _amount
+        uint256 _amount,
+        address[] memory _path
     ) public {
         require(_amount > 0, "NOTHING TO TRADE");
 
@@ -163,12 +182,11 @@ contract WunderSwapperDelta {
 
         ERC20(_tokenIn).approve(quickSwapRouterAddress, _amount);
 
-        address[] memory path = getPathFor(_tokenIn, _tokenOut);
-        uint256[] memory amounts = getAmounts(_amount, path);
+        uint256[] memory amounts = getAmounts(_amount, _path);
         QuickSwapRouter(quickSwapRouterAddress).swapExactTokensForTokens(
             amounts[0],
             amounts[amounts.length - 1],
-            path,
+            _path,
             msg.sender,
             block.timestamp + 1200
         );
@@ -181,32 +199,64 @@ contract WunderSwapperDelta {
         );
     }
 
+    function swapTokens(
+        address _tokenIn,
+        address _tokenOut,
+        uint256 _amount
+    ) public {
+        require(_amount > 0, "NOTHING TO TRADE");
+        address[] memory path = getPathFor(_tokenIn, _tokenOut, _amount);
+        swapTokensWithPath(_tokenIn, _tokenOut, _amount, path);
+    }
+
+    function swapAllTokensWithPath(
+        address _tokenIn,
+        address _tokenOut,
+        address[] memory _path
+    ) external {
+        uint256 balance = ERC20(_tokenIn).balanceOf(address(this));
+        swapTokensWithPath(_tokenIn, _tokenOut, balance, _path);
+    }
+
     function swapAllTokens(address _tokenIn, address _tokenOut) external {
         uint256 balance = ERC20(_tokenIn).balanceOf(address(this));
         swapTokens(_tokenIn, _tokenOut, balance);
     }
 
-    function getPathFor(address _tokenOne, address _tokenTwo)
-        public
-        view
-        returns (address[] memory)
-    {
+    function getPathFor(
+        address _tokenOne,
+        address _tokenTwo,
+        uint256 _amount
+    ) public view returns (address[] memory) {
         address factoryAddress = QuickSwapRouter(quickSwapRouterAddress)
             .factory();
-        if (
-            QuickSwapFactory(factoryAddress).getPair(_tokenOne, _tokenTwo) ==
-            address(0)
-        ) {
-            address[] memory path = new address[](3);
-            path[0] = _tokenOne;
-            path[1] = wrappedMaticAddress;
-            path[2] = _tokenTwo;
-            return path;
+        address pairAddress = QuickSwapFactory(factoryAddress).getPair(
+            _tokenOne,
+            _tokenTwo
+        );
+
+        address[] memory maticPath = new address[](3);
+        maticPath[0] = _tokenOne;
+        maticPath[1] = wrappedMaticAddress;
+        maticPath[2] = _tokenTwo;
+
+        if (pairAddress == address(0)) {
+            return maticPath;
         } else {
-            address[] memory path = new address[](2);
-            path[0] = _tokenOne;
-            path[1] = _tokenTwo;
-            return path;
+            address[] memory directPath = new address[](2);
+            directPath[0] = _tokenOne;
+            directPath[1] = _tokenTwo;
+            uint256[] memory maticAmounts = getAmounts(_amount, maticPath);
+            uint256[] memory directAmounts = getAmounts(_amount, directPath);
+
+            if (
+                maticAmounts[maticAmounts.length - 1] >
+                directAmounts[directAmounts.length - 1]
+            ) {
+                return maticPath;
+            } else {
+                return directPath;
+            }
         }
     }
 }

@@ -19,6 +19,6 @@
 
 ### Delta
 
-- WunderSwapperDelta: ---
+- WunderSwapperDelta: 0xC89097B68AED3168c749395AD63B2079253CA599
 - PoolLauncherDelta: 0xA40E3c0efA5a1Fa1C84aD7958e7aBf0Cf186809F
 - WunderProposalDelta: 0xD92C084A562B21Cc0F6098A3e97fed5357fe2947
