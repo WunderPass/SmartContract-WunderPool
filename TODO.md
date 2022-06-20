@@ -1,14 +1,14 @@
 # WunderPool
 
-- Deadline Minimum?
+- Testen:
 
-  - Members should have enough time to vote
-  - Minimum Adjustable when createPool?
-  - Minimum 2 Holder && 50% (Konfigurierbar)
+  - Mitglieder ausbezahlen mit Proposal?
+
+- Deposit Fee an WunderPass
+
+- Web2 Callback after Proposal (1Inch)
 
 - Two deadlines: One for voting period and one after which execution will be permitted if minority voted against it
-
-- Make PoolConfig (e.g. minimumInvest) adjustable via proposal
 
 - consider removing openProposalIds in WunderPool
 
@@ -20,12 +20,7 @@
 
   - Early Access mit WP NFT
 
-- Proposal should store the creator
-
 - Remove Proposals that did not follow through
-
-- require(proposal.value <= maxSpendingThreshold, "Execution not permitted: Proposal exceeds max spending Limit");
-  Das sollte in submit Proposal rein und maxSpending Threshold kann dann von Admins angepasst werden.
 
 - WunderPool liquidation should delete it from PoolLauncher
 
@@ -37,11 +32,35 @@
 
   1. If new constructor params are required, ask with a popup
 
-- WunderSwapper getUsdcPriceOf
-
-- WunderSwapper getBestPath => Manchmal ist der USDC Path nicht der beste. Check liquidity of pair oder price und wähle den besten
-
 **_TESTING_**
+
+- PoolConfig
+
+  - minEntryBarrier
+  - maxEntryBarrier
+  - maximum Members
+  - Deadline Minimum
+    - Members should have enough time to vote
+    - Minimum Adjustable when createPool?
+    - Default: 1 week
+  - VotingThreshold
+    - Default: Minimum 2 Holder && 51%
+  - Make PoolConfig adjustable via proposal
+
+- Nachträgliches Beitreten über:
+
+  - function createJoinProposal(address \_user, uint \_amount) public
+  - function joinForUser wenn User GovernanceTokens hat
+
+- Beim whitelisten die möglichkeit geben, ein Passwort zu signieren/whitelisten anstatt einer Adresse (für User ohne WunderID)
+
+- Address[] bei Pool creation übergeben zum whitelisten der Member
+
+- Proposal should store the creator
+
+- Übertragung der Stimmrechte
+
+**_DONE_**
 
 - WunderSwapper function sellAllTokens(tokenAddress) => check balanceOf(msg.sender)
 
@@ -49,7 +68,9 @@
 
 - WunderSwapper Swap Tokens that don't have a QuickSwap Pair
 
-**_DONE_**
+- WunderSwapper getUsdcPriceOf
+
+- WunderSwapper getBestPath => Manchmal ist der USDC Path nicht der beste. Check liquidity of pair oder price und wähle den besten
 
 - NFTs need to be removable from the pool
 
