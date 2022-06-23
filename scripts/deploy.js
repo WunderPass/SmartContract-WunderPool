@@ -1,5 +1,18 @@
 const fs = require('fs');
 const version = 'Epsilon';
+const { exec } = require('child_process');
+
+function verify(params) {
+  exec(
+    `npx hardhat verify --network polygon ${params}`,
+    (error, stdout, stderr) => {
+      console.log(stdout);
+      if (error !== null) {
+        console.log(`exec error: ${error}`);
+      }
+    }
+  );
+}
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -76,6 +89,14 @@ async function main() {
   fs.writeFileSync(
     `deployed/PoolLauncher${version}.json`,
     JSON.stringify(poolLauncherData)
+  );
+
+  // Verify
+  verify(`${governanceTokenLauncher.address}`);
+  verify(`${poolConfig.address}`);
+  verify(`${wunderProposal.address} "${poolConfig.address}"`);
+  verify(
+    `${poolLauncher.address} "${wunderProposal.address}" "${poolConfig.address}" "${governanceTokenLauncher.address}"`
   );
 }
 

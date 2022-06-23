@@ -406,6 +406,30 @@ function getOwnedNftTokenIds(address contractAddress) public view returns (uint2
 
 Gibt ein Array aller Token IDs eines ERC721 Tokens aus, die der Pool besitzt.
 
+#### GovernanceTokens of a user
+
+```solidity
+function governanceTokensOf(address user) public view returns(uint256 balance)
+```
+
+Gibt die Anzahl an GovernanceTokens eines Users zurück.
+
+#### Total GovernanceTokens
+
+```solidity
+function totalGovernanceTokens() public view returns (uint256 balance)
+```
+
+Gibt den total Supply an GovernanceTokens zurück.
+
+#### GovernanceToken Price
+
+```solidity
+function governanceTokenPrice() public view returns (uint256 price)
+```
+
+Gibt den Preis eines GovernanceTokens zurück.
+
 ### PoolConfig Contract
 
 Die `pool` Adresse in allen folgenden Funktionen ist die Adresse des WunderPools, für den man die Informationen haben möchte.

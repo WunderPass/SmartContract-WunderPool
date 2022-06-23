@@ -55,7 +55,7 @@ describe('POOL JOURNEY', () => {
   });
 
   describe('Moritz creates a new Pool', () => {
-    let pool, govToken, abiCoder;
+    let pool, governanceToken, abiCoder;
     beforeEach(async () => {
       abiCoder = new ethers.utils.AbiCoder();
       await createPool(poolLauncher, moritz, {
@@ -69,10 +69,10 @@ describe('POOL JOURNEY', () => {
         poolAddress,
         moritz
       );
-      const govTokenAddress = await pool.govToken();
-      govToken = await ethers.getContractAt(
+      const governanceTokenAddress = await pool.governanceToken();
+      governanceToken = await ethers.getContractAt(
         'PoolGovernanceTokenEpsilon',
-        govTokenAddress,
+        governanceTokenAddress,
         moritz
       );
     });
@@ -87,13 +87,15 @@ describe('POOL JOURNEY', () => {
     });
 
     it('Should launch a new Governance Token', async () => {
-      expect(await govToken.name()).to.equal('Dorsch Pool Token');
-      expect(await govToken.symbol()).to.equal('DPT');
-      expect(await govToken.decimals()).to.equal(0);
-      expect(await govToken.balanceOf(moritz.address)).to.equal(100);
-      expect(await govToken.launcherAddress()).to.equal(poolLauncher.address);
-      expect(await govToken.poolAddress()).to.equal(pool.address);
-      expect(await govToken.price()).to.equal(usdc(0.1));
+      expect(await governanceToken.name()).to.equal('Dorsch Pool Token');
+      expect(await governanceToken.symbol()).to.equal('DPT');
+      expect(await governanceToken.decimals()).to.equal(0);
+      expect(await governanceToken.balanceOf(moritz.address)).to.equal(100);
+      expect(await governanceToken.launcherAddress()).to.equal(
+        poolLauncher.address
+      );
+      expect(await governanceToken.poolAddress()).to.equal(pool.address);
+      expect(await governanceToken.price()).to.equal(usdc(0.1));
     });
 
     it('Should transfer the USDC from Moritz to the Pool', async () => {
@@ -315,14 +317,14 @@ describe('POOL JOURNEY', () => {
         });
 
         it('Gerwin receives the correct amount of Governance Tokens', async () => {
-          expect(await govToken.balanceOf(gerwin.address)).to.equal(100);
+          expect(await governanceToken.balanceOf(gerwin.address)).to.equal(100);
         });
 
         it('Moritz can increase his stake in the Pool...', async () => {
           await topUp(moritz, usdc(10));
           await approve(moritz, pool.address, usdc(10));
           await pool.connect(moritz).fundPool(usdc(10));
-          expect(await govToken.balanceOf(moritz.address)).to.equal(200);
+          expect(await governanceToken.balanceOf(moritz.address)).to.equal(200);
         });
 
         it('...but only to the maxInvest Limit', async () => {
@@ -381,8 +383,8 @@ describe('POOL JOURNEY', () => {
 
         describe('Users can join after Pool was closed when...', () => {
           it('...they own governanceTokens', async () => {
-            const balance = await govToken.balanceOf(moritz.address);
-            await govToken.transfer(despot.address, balance.div(2));
+            const balance = await governanceToken.balanceOf(moritz.address);
+            await governanceToken.transfer(despot.address, balance.div(2));
             await pool.connect(backend).joinForUser(0, despot.address, '');
             expect(await pool.isMember(despot.address)).to.equal(true);
           });
@@ -393,7 +395,9 @@ describe('POOL JOURNEY', () => {
             await voteForUser(backend, gerwin, pool, 0, 1);
             await pool.executeProposal(0);
             expect(await pool.isMember(despot.address)).to.equal(true);
-            expect(await govToken.balanceOf(despot.address)).to.equal(50);
+            expect(await governanceToken.balanceOf(despot.address)).to.equal(
+              50
+            );
             expect(await usdcBalance(pool.address)).to.equal(usdc(30));
           });
         });
@@ -403,8 +407,8 @@ describe('POOL JOURNEY', () => {
           beforeEach(async () => {
             await addToWhiteList(backend, moritz, pool, slava);
             await joinPool(backend, slava, pool, 10);
-            moritzShares = await govToken.balanceOf(moritz.address);
-            gerwinsShares = await govToken.balanceOf(gerwin.address);
+            moritzShares = await governanceToken.balanceOf(moritz.address);
+            gerwinsShares = await governanceToken.balanceOf(gerwin.address);
 
             await createProposal(
               backend,
@@ -469,12 +473,12 @@ describe('POOL JOURNEY', () => {
           });
 
           it('Members can delegate their votes', async () => {
-            await delegateVotes(backend, gerwin, govToken, moritz);
+            await delegateVotes(backend, gerwin, governanceToken, moritz);
             expect(
               (await wunderProp.getProposal(pool.address, 0)).yesVotes
             ).to.equal(moritzShares.add(gerwinsShares));
 
-            await revokeVotes(backend, gerwin, govToken);
+            await revokeVotes(backend, gerwin, governanceToken);
             expect(
               (await wunderProp.getProposal(pool.address, 0)).yesVotes
             ).to.equal(moritzShares);
@@ -494,7 +498,9 @@ describe('POOL JOURNEY', () => {
             await topUp(gerwin, usdc(12));
             await approve(gerwin, pool.address, usdc(10));
             await pool.connect(gerwin).fundPool(usdc(10));
-            const gerwinsTokens = await govToken.balanceOf(gerwin.address);
+            const gerwinsTokens = await governanceToken.balanceOf(
+              gerwin.address
+            );
 
             expect(gerwinsTokens).to.equal(200);
 

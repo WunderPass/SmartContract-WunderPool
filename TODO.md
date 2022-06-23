@@ -32,7 +32,16 @@
 
   1. If new constructor params are required, ask with a popup
 
+- Nachträgliches Beitreten über:
+
+  - function createJoinProposal(address \_user, uint \_amount) public
+  - User wird freigeschaltet, beizutreten
+  - So wie es bisher ist, kann der User abgezockt werden, da er das Geld vorher autorisieren muss
+  - Das joinPoolProposal soll den User also nur auf eine Liste setzen, die es ihm erlaubt, für einen bestimmten Betrag X beizutreten
+
 **_TESTING_**
+
+**_DONE_**
 
 - PoolConfig
 
@@ -49,7 +58,6 @@
 
 - Nachträgliches Beitreten über:
 
-  - function createJoinProposal(address \_user, uint \_amount) public
   - function joinForUser wenn User GovernanceTokens hat
 
 - Beim whitelisten die möglichkeit geben, ein Passwort zu signieren/whitelisten anstatt einer Adresse (für User ohne WunderID)
@@ -59,8 +67,6 @@
 - Proposal should store the creator
 
 - Übertragung der Stimmrechte
-
-**_DONE_**
 
 - WunderSwapper function sellAllTokens(tokenAddress) => check balanceOf(msg.sender)
 

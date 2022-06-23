@@ -30,9 +30,9 @@ interface WunderProposal {
         string memory title,
         string memory description,
         uint256 amount,
-        uint256 govTokens,
+        uint256 governanceTokens,
         address paymentToken,
-        address govToken
+        address governanceToken
     ) external;
 
     function vote(
@@ -123,11 +123,11 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
     constructor(
         string memory _name,
         address _launcher,
-        address _govToken,
+        address _governanceToken,
         address _creator,
         address[] memory _members,
         uint256 _amount
-    ) WunderVaultEpsilon(_govToken) {
+    ) WunderVaultEpsilon(_governanceToken) {
         name = _name;
         launcherAddress = _launcher;
         investOfUser[_creator] = _amount;
@@ -192,7 +192,7 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
         string memory _title,
         string memory _description,
         uint256 _amount,
-        uint256 _govTokens
+        uint256 _governanceTokens
     ) public {
         uint256 nextProposalId = proposalIds.length;
         proposalIds.push(nextProposalId);
@@ -203,9 +203,9 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
             _title,
             _description,
             _amount,
-            _govTokens,
+            _governanceTokens,
             USDC,
-            govToken
+            governanceToken
         );
 
         emit NewProposal(nextProposalId, _user, _title);
@@ -269,7 +269,7 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
         address _user,
         string memory _secret
     ) public exceptPool {
-        if (govTokensOf(_user) <= 0) {
+        if (governanceTokensOf(_user) <= 0) {
             require(!poolClosed, "Pool Closed");
             if (_secretWhiteList[keccak256(bytes(_secret))] > 0) {
                 _secretWhiteList[keccak256(bytes(_secret))] -= 1;
@@ -280,7 +280,7 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
             reqJoin(_amount, _user);
             reqTra(USDC, _user, address(this), _amount);
             investOfUser[_user] += _amount;
-            _issueGovTokens(_user, _amount / govTokenPrice());
+            _issueGovernanceTokens(_user, _amount / governanceTokenPrice());
         }
         _addMember(_user);
         emit NewMember(_user, _amount);
@@ -295,7 +295,7 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
         );
         investOfUser[msg.sender] += _amount;
         reqTra(USDC, msg.sender, address(this), _amount);
-        _issueGovTokens(msg.sender, _amount / govTokenPrice());
+        _issueGovernanceTokens(msg.sender, _amount / governanceTokenPrice());
     }
 
     function addMember(address _newMember) public {
@@ -379,7 +379,7 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
         _distributeFullBalanceOfAllTokensEvenly(members);
         _distributeAllMaticEvenly(members);
         _distributeAllNftsEvenly(members);
-        _destroyGovToken();
+        _destroyGovernanceToken();
         selfdestruct(payable(members[0]));
     }
 
@@ -408,7 +408,7 @@ contract WunderPoolEpsilon is WunderVaultEpsilon {
             address(this),
             _amount,
             investOfUser[_user],
-            govTokenPrice(),
+            governanceTokenPrice(),
             members.length
         );
         require(canJoin, errMsg);

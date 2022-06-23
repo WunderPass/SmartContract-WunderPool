@@ -7,11 +7,9 @@ interface WunderPool {
 
     function poolMembers() external view returns (address[] memory);
 
-    function govToken() external view returns (address);
+    function governanceToken() external view returns (address);
 
-    function govTokensOf(address user) external view returns (uint256 balance);
-
-    function totalGovTokens() external view returns (uint256 tokens);
+    function totalGovernanceTokens() external view returns (uint256 tokens);
 }
 
 interface PoolConfig {
@@ -22,7 +20,7 @@ interface PoolConfig {
     function minYesVoters(address) external view returns (uint256);
 }
 
-interface GovToken {
+interface IGovernanceToken {
     function votesOf(address account) external view returns (uint256);
 }
 
@@ -107,13 +105,13 @@ contract WunderProposalEpsilon {
         string memory _title,
         string memory _description,
         uint256 _amount,
-        uint256 _govTokens,
+        uint256 _governanceTokens,
         address _paymentToken,
-        address _govToken
+        address _governanceToken
     ) public {
         address[] memory contractAddresses = new address[](3);
         contractAddresses[0] = _paymentToken;
-        contractAddresses[1] = _govToken;
+        contractAddresses[1] = _governanceToken;
         contractAddresses[2] = msg.sender;
 
         string[] memory actions = new string[](3);
@@ -123,7 +121,7 @@ contract WunderProposalEpsilon {
 
         bytes[] memory params = new bytes[](3);
         params[0] = abi.encode(_user, msg.sender, _amount);
-        params[1] = abi.encode(_user, _govTokens);
+        params[1] = abi.encode(_user, _governanceTokens);
         params[2] = abi.encode(_user);
 
         uint256[] memory values = new uint256[](3);
@@ -239,7 +237,7 @@ contract WunderProposalEpsilon {
         }
 
         uint8 votingThreshold = PoolConfig(poolConfig).votingThreshold(_pool);
-        uint256 totalVotes = WunderPool(_pool).totalGovTokens();
+        uint256 totalVotes = WunderPool(_pool).totalGovernanceTokens();
 
         if (noVotes > ((totalVotes * (100 - votingThreshold)) / 100)) {
             return (false, "Majority voted against execution");
@@ -285,7 +283,7 @@ contract WunderProposalEpsilon {
     {
         Proposal storage proposal = pools[_pool].proposals[_proposalId];
         (uint256 yes, uint256 no, , ) = calculateVotes(_pool, _proposalId);
-        uint256 total = WunderPool(_pool).totalGovTokens();
+        uint256 total = WunderPool(_pool).totalGovernanceTokens();
         return (
             proposal.title,
             proposal.description,
@@ -342,7 +340,11 @@ contract WunderProposalEpsilon {
         );
     }
 
-    function GovernanceToken(address _pool) internal view returns (GovToken) {
-        return GovToken(WunderPool(_pool).govToken());
+    function GovernanceToken(address _pool)
+        internal
+        view
+        returns (IGovernanceToken)
+    {
+        return IGovernanceToken(WunderPool(_pool).governanceToken());
     }
 }
