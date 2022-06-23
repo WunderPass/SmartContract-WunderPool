@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  hardhat-network:
+    image: wunderpass/wunder-pool
+    container_name: SmartContract-WunderPool
+    environment:
+      ALCHEMY_MAINNET_URL: "https://polygon-mainnet.g.alchemy.com/v2/AShXW4lxXnToOLzdasms8EHYRCUNNm9s"
+      PRIVATE_KEY: 5b15b9939cd2ee5dd26534bf366ca0c457394f0c79d529abf376159cafed609c
+      PRIVATE_KEY_M: 5b15b9939cd2ee5dd26534bf366ca0c457394f0c79d529abf376159cafed609c
+    ports:
+      - 8545:8545

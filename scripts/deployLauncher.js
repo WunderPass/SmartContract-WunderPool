@@ -11,7 +11,7 @@ async function main() {
   const contract = await PoolLauncher.deploy(
     '0xD92C084A562B21Cc0F6098A3e97fed5357fe2947'
   );
-  console.log(`Token address: ${contract.address}`);
+  console.log(`Launcher address: ${contract.address}`);
 
   const contractData = {
     address: contract.address,

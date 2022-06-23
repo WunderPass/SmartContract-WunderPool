@@ -1,5 +1,10 @@
 {
   "name": "wundernft",
+  "scripts": {
+    "start:local": "./node_modules/.bin/hardhat --config hardhat.config.js node",
+    "deploy:local": "./node_modules/.bin/hardhat --config hardhat.config.js --network localhost run scripts/deploy.js",
+    "initialize:local": "./node_modules/.bin/hardhat --config hardhat.config.js --network localhost run test/initializeTestAccounts.js"
+  },
   "devDependencies": {
     "@chainlink/contracts": "^0.3.1",
     "@nomiclabs/hardhat-ethers": "^2.0.4",
@@ -10,7 +15,7 @@
     "dotenv": "^11.0.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.3",
-    "hardhat": "^2.8.2"
+    "hardhat": "^2.9.9"
   },
   "dependencies": {
     "chai-arrays": "^2.2.0",

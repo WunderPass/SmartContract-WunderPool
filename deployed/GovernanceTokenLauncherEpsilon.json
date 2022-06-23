@@ -1,1 +1,1 @@
-{"address":"0xa3F7bC890461caBB312b87CD002b6cC55986172e","abi":["function createToken(string _name, string _symbol, uint256 _amount, address _creator) returns (address)"]}
+{"address":"0xa524FFD704A4E33566C230bfcd3567251ca42aD8","abi":["function createToken(string _name, string _symbol, uint256 _amount, address _creator) returns (address)"]}
