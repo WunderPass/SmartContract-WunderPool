@@ -2,11 +2,15 @@ version: "3.8"
 
 services:
   hardhat-network:
-    image: wunderpass/wunder-pool
-    container_name: SmartContract-WunderPool
+    image: wunderpass/hardhat-node:0.0.1
+    container_name: hardhat-node
+    healthcheck:
+      test: curl --fail 127.0.0.1:8545 || exit 1
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
     environment:
-      ALCHEMY_MAINNET_URL: "https://polygon-mainnet.g.alchemy.com/v2/AShXW4lxXnToOLzdasms8EHYRCUNNm9s"
-      PRIVATE_KEY: 5b15b9939cd2ee5dd26534bf366ca0c457394f0c79d529abf376159cafed609c
-      PRIVATE_KEY_M: 5b15b9939cd2ee5dd26534bf366ca0c457394f0c79d529abf376159cafed609c
+      ALCHEMY_MAINNET_URL: "${ALCHEMY_MAINNET_URL}"
     ports:
       - 8545:8545

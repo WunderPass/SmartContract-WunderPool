@@ -1,9 +1,9 @@
 {
   "name": "wundernft",
   "scripts": {
-    "start:local": "./node_modules/.bin/hardhat --config hardhat.config.js node",
-    "deploy:local": "./node_modules/.bin/hardhat --config hardhat.config.js --network localhost run scripts/deploy.js",
-    "initialize:local": "./node_modules/.bin/hardhat --config hardhat.config.js --network localhost run test/initializeTestAccounts.js"
+    "start:local": "./node_modules/.bin/hardhat --config hardhat.config.local.js node",
+    "deploy:local": "./node_modules/.bin/hardhat --config hardhat.config.local.js --network localhost run scripts/deploy.js",
+    "initialize:local": "./node_modules/.bin/hardhat --config hardhat.config.local.js --network localhost run test/initializeTestAccounts.js"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.3.1",
