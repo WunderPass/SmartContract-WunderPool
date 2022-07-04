@@ -17,7 +17,7 @@ contract PoolLauncherEpsilon {
     address public USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
     address public wunderProposal;
     address public poolConfig;
-    address public govTokenLauncher;
+    address public governanceTokenLauncher;
 
     address[] internal launchedPools;
 
@@ -33,11 +33,11 @@ contract PoolLauncherEpsilon {
     constructor(
         address _wunderProposal,
         address _poolConfig,
-        address _govTokenLauncher
+        address _governanceTokenLauncher
     ) {
         wunderProposal = _wunderProposal;
         poolConfig = _poolConfig;
-        govTokenLauncher = _govTokenLauncher;
+        governanceTokenLauncher = _governanceTokenLauncher;
     }
 
     function createNewPool(
@@ -54,7 +54,7 @@ contract PoolLauncherEpsilon {
         uint256 _votingTime,
         uint256 _minYesVoters
     ) public {
-        address newToken = TokenLauncher(govTokenLauncher).createToken(
+        address newToken = TokenLauncher(governanceTokenLauncher).createToken(
             _tokenName,
             _tokenSymbol,
             _amount,
@@ -79,7 +79,7 @@ contract PoolLauncherEpsilon {
         }
 
         memberPools[_creator].push(address(newPool));
-        IGovToken(newToken).setPoolAddress(address(newPool));
+        IGovernanceToken(newToken).setPoolAddress(address(newPool));
 
         emit PoolLaunched(address(newPool), _poolName, newToken);
     }

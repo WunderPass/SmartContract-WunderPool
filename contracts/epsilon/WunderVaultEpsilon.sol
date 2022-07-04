@@ -19,7 +19,7 @@ interface ERC721Interface {
     function ownerOf(uint256 tokenId) external view returns (address);
 }
 
-interface IGovToken {
+interface IGovernanceToken {
     function setPoolAddress(address _poolAddress) external;
 
     function issue(address, uint256) external;
@@ -32,7 +32,7 @@ interface IGovToken {
 contract WunderVaultEpsilon {
     address public USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
 
-    address public govToken;
+    address public governanceToken;
 
     address[] internal ownedTokenAddresses;
     mapping(address => bool) public ownedTokenLookup;
@@ -52,7 +52,7 @@ contract WunderVaultEpsilon {
     );
 
     constructor(address _tokenAddress) {
-        govToken = _tokenAddress;
+        governanceToken = _tokenAddress;
     }
 
     function addToken(
@@ -126,9 +126,9 @@ contract WunderVaultEpsilon {
                             block.timestamp
                         )
                     )
-                ) % totalGovTokens();
+                ) % totalGovernanceTokens();
                 for (uint256 j = 0; j < _receivers.length; j++) {
-                    sum += govTokensOf(_receivers[j]);
+                    sum += governanceTokensOf(_receivers[j]);
                     if (sum >= randomNumber) {
                         (bool success, ) = _tokenAddress.call(
                             abi.encodeWithSignature(
@@ -161,7 +161,8 @@ contract WunderVaultEpsilon {
             _withdrawTokens(
                 _tokenAddress,
                 _receivers[index],
-                (_amount * govTokensOf(_receivers[index])) / totalGovTokens()
+                (_amount * governanceTokensOf(_receivers[index])) /
+                    totalGovernanceTokens()
             );
         }
     }
@@ -195,7 +196,8 @@ contract WunderVaultEpsilon {
         for (uint256 index = 0; index < _receivers.length; index++) {
             _withdrawMatic(
                 _receivers[index],
-                (_amount * govTokensOf(_receivers[index])) / totalGovTokens()
+                (_amount * governanceTokensOf(_receivers[index])) /
+                    totalGovernanceTokens()
             );
         }
     }
@@ -223,24 +225,30 @@ contract WunderVaultEpsilon {
         }
     }
 
-    function _issueGovTokens(address _newUser, uint256 _amount) internal {
-        IGovToken(govToken).issue(_newUser, _amount);
+    function _issueGovernanceTokens(address _newUser, uint256 _amount)
+        internal
+    {
+        IGovernanceToken(governanceToken).issue(_newUser, _amount);
     }
 
-    function govTokensOf(address _user) public view returns (uint256 balance) {
-        return ERC20Interface(govToken).balanceOf(_user);
+    function governanceTokensOf(address _user)
+        public
+        view
+        returns (uint256 balance)
+    {
+        return ERC20Interface(governanceToken).balanceOf(_user);
     }
 
-    function totalGovTokens() public view returns (uint256 balance) {
-        return ERC20Interface(govToken).totalSupply();
+    function totalGovernanceTokens() public view returns (uint256 balance) {
+        return ERC20Interface(governanceToken).totalSupply();
     }
 
-    function govTokenPrice() public view returns (uint256 price) {
-        return IGovToken(govToken).price();
+    function governanceTokenPrice() public view returns (uint256 price) {
+        return IGovernanceToken(governanceToken).price();
     }
 
-    function _destroyGovToken() internal {
-        IGovToken(govToken).destroy();
+    function _destroyGovernanceToken() internal {
+        IGovernanceToken(governanceToken).destroy();
     }
 
     function reqTra(

@@ -26,7 +26,7 @@
 ### Epsilon - [Docs](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/EPSILON.md)
 
 - [WunderSwapperEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/WunderSwapperEpsilon.sol): ---
-- [PoolLauncherEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/PoolLauncherEpsilon.sol): 0x34645Cb6b71A4513AC3e3D9683DF48142114e55B
-- [WunderProposalEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/WunderProposalEpsilon.sol): 0x0BfCa025a400300d50C89bFD49961eB127480D07
-- [PoolConfigEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/PoolConfigEpsilon.sol): 0xBdF6B08B6E533864a3F1cf24760DD5D8776140a8
-- [GovernanceTokenLauncherEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/GovernanceTokenLauncherEpsilon.sol): 0xa3F7bC890461caBB312b87CD002b6cC55986172e
+- [PoolLauncherEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/PoolLauncherEpsilon.sol): 0x4294FB86A22c3A89B2FA660de39e23eA91D5B35E
+- [WunderProposalEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/WunderProposalEpsilon.sol): 0x2A68Dfe9c586DDb209aB3895B85eA6f9804F1551
+- [PoolConfigEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/PoolConfigEpsilon.sol): 0x1e2227686F1015B0EEa9A55F88461D15fFD0E87c
+- [GovernanceTokenLauncherEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/GovernanceTokenLauncherEpsilon.sol): 0x3c1EdEB4B943F249dCf741DbB054B4dACeC865B4
