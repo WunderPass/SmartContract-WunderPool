@@ -2,15 +2,15 @@ version: "3.8"
 
 services:
   hardhat-network:
-    image: wunderpass/hardhat-node:0.0.1
+    image: wunderpass/hardhat-node:0.0.2
     container_name: hardhat-node
     healthcheck:
-      test: curl --fail 127.0.0.1:8545 || exit 1
-      interval: 1m30s
+      test: "node /usr/local/bin/healthcheck.js"
+      interval: 10s
       timeout: 30s
       retries: 5
-      start_period: 30s
+      start_period: 5s
     environment:
       ALCHEMY_MAINNET_URL: "${ALCHEMY_MAINNET_URL}"
     ports:
-      - 8545:8545
+      - 8545:8546
