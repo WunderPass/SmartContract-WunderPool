@@ -1,20 +1,18 @@
 # WunderPool
 
+- JoinPoolProposal erstellt von den Pool Membern und eingeladener User muss USDC autorisieren
+
+- Invite with address[]
+
 - Testen:
 
   - Mitglieder ausbezahlen mit Proposal?
-
-- Deposit Fee an WunderPass
 
 - Web2 Callback after Proposal (1Inch)
 
 - Two deadlines: One for voting period and one after which execution will be permitted if minority voted against it
 
 - consider removing openProposalIds in WunderPool
-
-- AutoVerify after event emitted (maybe adjust poolCreated event):
-  ex. npx hardhat verify --network polygon 0x10c0c139db50bD2e475C980f70F1A9808d9f3977 "WunderPassTeamPool" "0x7e0b49362897706290b7312d0b0902a1629397d8" "0xc484B477BE6c3C58Fe3b4d3ede08BE96f47c5DEb" "0x5009cdEB9A4348cC91f77F653B56a1e494CCb12d" "1000000000000000000"
-  npx hardhat verify --network polygon 0x76fDB74BC7E02e4faCA975087f90139cc869A9A6 "CryptoApes" "0x7e0b49362897706290b7312d0b0902a1629397d8" "0xc484B477BE6c3C58Fe3b4d3ede08BE96f47c5DEb" "0x62099b1413f44594Ac153b3fc76BCC6bb9234eC3" "100000000000000000"
 
 - Perks depending on WunderPass NFT status
 
@@ -32,14 +30,20 @@
 
   1. If new constructor params are required, ask with a popup
 
+**_TESTING_**
+
+- Deposit Fee an WunderPass
+
+- Pool speichert die gewhitelisteten Member in einem Array, damit diese aus dem Frontend/Backend ausgelesen werden können
+
 - Nachträgliches Beitreten über:
 
   - function createJoinProposal(address \_user, uint \_amount) public
-  - User wird freigeschaltet, beizutreten
   - So wie es bisher ist, kann der User abgezockt werden, da er das Geld vorher autorisieren muss
-  - Das joinPoolProposal soll den User also nur auf eine Liste setzen, die es ihm erlaubt, für einen bestimmten Betrag X beizutreten
-
-**_TESTING_**
+    - Der Austausch von USDC gegen GovTokens muss im GovernanceToken Contract erfolgen:
+      - Funktion: swapTokenToGovTokens(address \_user, address \_token, uint \_amount, uint \_shares, bytes signature) public onlyPool
+      - GovToken Contract wird autorisiert statt des Pools
+      - Signiert werden alle Input Parameter, damit keine Faxen gemacht werden können
 
 **_DONE_**
 

@@ -1,5 +1,9 @@
 const fs = require('fs');
-const version = 'Epsilon';
+const version = 'Zeta';
+const treasuryAddress = '0x4d2ca400de2fc1b905197995e8b0a05f5fd3ee0d';
+const swapFees = 10;
+const entryFees = 30;
+
 const { exec } = require('child_process');
 
 function verify(params) {
@@ -21,6 +25,23 @@ async function main() {
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${balance.toString()}`);
 
+  // WunderSwapper
+  const WunderSwapper = await ethers.getContractFactory(
+    `WunderSwapper${version}`
+  );
+  const wunderSwapper = await WunderSwapper.deploy(treasuryAddress, swapFees);
+  console.log(`WunderSwapper: ${wunderSwapper.address}`);
+
+  const wunderSwapperData = {
+    address: wunderSwapper.address,
+    abi: wunderSwapper.interface.format('full'),
+  };
+
+  fs.writeFileSync(
+    `deployed/WunderSwapper${version}.json`,
+    JSON.stringify(wunderSwapperData)
+  );
+
   // GovTokenLauncher
   const GovernanceTokenLauncher = await ethers.getContractFactory(
     `GovernanceTokenLauncher${version}`
@@ -40,7 +61,7 @@ async function main() {
 
   // PoolConfig
   const PoolConfig = await ethers.getContractFactory(`PoolConfig${version}`);
-  const poolConfig = await PoolConfig.deploy();
+  const poolConfig = await PoolConfig.deploy(treasuryAddress, entryFees);
   console.log(`PoolConfig: ${poolConfig.address}`);
 
   const poolConfigData = {
@@ -92,8 +113,9 @@ async function main() {
   );
 
   // Verify
+  verify(`${wunderSwapper.address} "${treasuryAddress}" "${swapFees}"`);
   verify(`${governanceTokenLauncher.address}`);
-  verify(`${poolConfig.address}`);
+  verify(`${poolConfig.address} "${treasuryAddress}" "${entryFees}"`);
   verify(`${wunderProposal.address} "${poolConfig.address}"`);
   verify(
     `${poolLauncher.address} "${wunderProposal.address}" "${poolConfig.address}" "${governanceTokenLauncher.address}"`

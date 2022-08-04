@@ -25,8 +25,15 @@
 
 ### Epsilon - [Docs](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/EPSILON.md)
 
-- [WunderSwapperEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/WunderSwapperEpsilon.sol): ---
 - [PoolLauncherEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/PoolLauncherEpsilon.sol): 0x4294FB86A22c3A89B2FA660de39e23eA91D5B35E
 - [WunderProposalEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/WunderProposalEpsilon.sol): 0x2A68Dfe9c586DDb209aB3895B85eA6f9804F1551
 - [PoolConfigEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/PoolConfigEpsilon.sol): 0x1e2227686F1015B0EEa9A55F88461D15fFD0E87c
 - [GovernanceTokenLauncherEpsilon](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/epsilon/GovernanceTokenLauncherEpsilon.sol): 0x3c1EdEB4B943F249dCf741DbB054B4dACeC865B4
+
+### Zeta - [Docs](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/ZETA.md)
+
+- [WunderSwapperZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/WunderSwapperZeta.sol): 0xD3d1bbA53446F60f7a2FcD3664a398245Fe4A128
+- [PoolLauncherZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/PoolLauncherZeta.sol): 0xB5Ae136D3817d8116Fce70Ac47e856fc484dafAe
+- [WunderProposalZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/WunderProposalZeta.sol): 0xC90403e7537c0E2b98D4E73109316fCC106E9e7a
+- [PoolConfigZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/PoolConfigZeta.sol): 0xB63D47962319822eABaD71765153FD2c38939d3a
+- [GovernanceTokenLauncherZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/GovernanceTokenLauncherZeta.sol): 0xbA7560522C3d9DbAE7Db1EB3fD2083Ae88FD6BE7

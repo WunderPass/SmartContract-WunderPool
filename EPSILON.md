@@ -348,7 +348,13 @@ Gibt aus, ob der Beitritt in den Pool noch möglich ist. Wird `false`, sobald da
 function poolMembers() public view returns (address[])
 ```
 
-Gibt die Adressen aller Pool Mitglieder aus.
+#### Whitelisted Users of a Pool
+
+```solidity
+function poolWhitelist() public view returns (address[])
+```
+
+Gibt die Adressen aller User aus, die gewhitelisted sind (Auch diejenigen, die schon member sind).
 
 #### User is Member
 

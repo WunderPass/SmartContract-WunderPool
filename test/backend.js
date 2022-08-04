@@ -1,4 +1,11 @@
-const { signMessage, topUp, approve, usdc, usdcBalance } = require('./helpers');
+const {
+  signMessage,
+  topUp,
+  approve,
+  usdc,
+  usdcBalance,
+  usdcAddress,
+} = require('./helpers');
 
 require('@nomiclabs/hardhat-waffle');
 
@@ -16,25 +23,21 @@ async function createPool(
     minYesVoters,
   }
 ) {
-  await topUp(user, usdc((amount == undefined ? 10 : amount) + 2));
-  await approve(
-    user,
-    launcher.address,
-    usdc(amount == undefined ? 10 : amount)
-  );
+  await topUp(user, usdc((amount ?? 10) + 2));
+  await approve(user, launcher.address, usdc(amount ?? 10));
   await launcher.createNewPool(
     'Dorsch Pool',
     'Dorsch Pool Token',
     'DPT',
-    usdc(amount == undefined ? 10 : amount),
+    usdc(amount ?? 10),
     user.address,
     members || [],
-    usdc(minInvest == undefined ? 10 : minInvest),
-    usdc(maxInvest == undefined ? 20 : maxInvest),
-    maxMembers == undefined ? 4 : maxMembers,
-    votingPercent == undefined ? 51 : votingPercent,
-    votingTime == undefined ? 86400 : votingTime,
-    minYesVoters == undefined ? 1 : minYesVoters
+    usdc(minInvest ?? 10),
+    usdc(maxInvest ?? 20),
+    maxMembers ?? 4,
+    votingPercent ?? 51,
+    votingTime ?? 86400,
+    minYesVoters ?? 1
   );
 }
 
@@ -67,6 +70,7 @@ async function addToWhiteListSecret(backend, signer, pool, validCount, secret) {
       validCount,
       signature
     );
+  return hashedSecret;
 }
 
 async function joinPool(backend, user, pool, amount, secret = '') {
@@ -75,17 +79,32 @@ async function joinPool(backend, user, pool, amount, secret = '') {
   await pool.connect(backend).joinForUser(usdc(amount), user.address, secret);
 }
 
-async function createJoinProposal(backend, user, pool, amount, govTokens) {
-  await topUp(user, usdc(amount).mul(11).div(10));
-  await approve(user, pool.address, usdc(amount));
+async function createJoinProposal(
+  backend,
+  user,
+  pool,
+  govToken,
+  amount,
+  shares
+) {
+  const usdcAmount = usdc(amount);
+  await topUp(user, usdcAmount.mul(11).div(10));
+  await approve(user, govToken.address, usdcAmount);
+  const nonce = await govToken.nonces(user.address);
+  const signature = await signMessage(
+    user,
+    ['address', 'address', 'address', 'uint256', 'uint256', 'uint256'],
+    [user.address, govToken.address, usdcAddress, usdcAmount, shares, nonce]
+  );
   await pool
     .connect(backend)
     .createJoinProposal(
       user.address,
       'Let me In',
       `I will pay ${amount}$ to join`,
-      usdc(amount),
-      govTokens
+      usdcAmount,
+      shares,
+      signature
     );
 }
 
