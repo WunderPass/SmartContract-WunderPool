@@ -1,5 +1,9 @@
 const fs = require('fs');
 
+const wunderProposal = '0xC90403e7537c0E2b98D4E73109316fCC106E9e7a';
+const poolConfig = '0xB63D47962319822eABaD71765153FD2c38939d3a';
+const governanceTokenLauncher = '0xbA7560522C3d9DbAE7Db1EB3fD2083Ae88FD6BE7';
+
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log(`Deploying contract with the account: ${deployer.address}`);
@@ -7,9 +11,11 @@ async function main() {
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${balance.toString()}`);
 
-  const PoolLauncher = await ethers.getContractFactory('PoolLauncherDelta');
+  const PoolLauncher = await ethers.getContractFactory('PoolLauncherZeta');
   const contract = await PoolLauncher.deploy(
-    '0xD92C084A562B21Cc0F6098A3e97fed5357fe2947'
+    wunderProposal,
+    poolConfig,
+    governanceTokenLauncher
   );
   console.log(`Token address: ${contract.address}`);
 
@@ -19,7 +25,7 @@ async function main() {
   };
 
   fs.writeFileSync(
-    'deployed/PoolLauncherDelta.json',
+    'deployed/PoolLauncherZeta.json',
     JSON.stringify(contractData)
   );
 }

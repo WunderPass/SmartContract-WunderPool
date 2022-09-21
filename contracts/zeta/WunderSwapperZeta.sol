@@ -9,6 +9,12 @@ interface ERC20 {
     function transfer(address recipient, uint256 amount)
         external
         returns (bool);
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
 }
 
 interface QuickSwapRouter {
@@ -155,14 +161,16 @@ contract WunderSwapperZeta {
         QuickSwapRouter(quickSwapRouterAddress).swapExactETHForTokens{
             value: residualAmount
         }(amounts[1], path, msg.sender, block.timestamp + 1200);
-        emit BoughtTokens(msg.sender, _tokenAddress, amounts[0], amounts[1]);
+        emit BoughtTokens(msg.sender, _tokenAddress, msg.value, amounts[1]);
     }
 
     function sellTokens(address _tokenAddress, uint256 _amount) public {
         require(_amount > 0, "NOTHING TO TRADE");
 
-        uint256 balance = ERC20(_tokenAddress).balanceOf(address(this));
+        uint256 balance = ERC20(_tokenAddress).balanceOf(msg.sender);
         require(balance >= _amount, "NOT ENOUGH FUNDS");
+
+        ERC20(_tokenAddress).transferFrom(msg.sender, address(this), _amount);
 
         uint256 swapAmount = transferFee(_tokenAddress, _amount);
 
@@ -179,11 +187,11 @@ contract WunderSwapperZeta {
             msg.sender,
             block.timestamp + 1200
         );
-        emit SoldTokens(msg.sender, _tokenAddress, amounts[1], amounts[0]);
+        emit SoldTokens(msg.sender, _tokenAddress, _amount, amounts[0]);
     }
 
     function sellAllTokens(address _tokenAddress) external {
-        uint256 balance = ERC20(_tokenAddress).balanceOf(address(this));
+        uint256 balance = ERC20(_tokenAddress).balanceOf(msg.sender);
         sellTokens(_tokenAddress, balance);
     }
 
@@ -195,14 +203,14 @@ contract WunderSwapperZeta {
     ) public {
         require(_amount > 0, "NOTHING TO TRADE");
 
-        uint256 balance = ERC20(_tokenIn).balanceOf(address(this));
+        uint256 balance = ERC20(_tokenIn).balanceOf(msg.sender);
         require(balance >= _amount, "NOT ENOUGH FUNDS");
 
+        ERC20(_tokenIn).transferFrom(msg.sender, address(this), _amount);
         uint256 swapAmount = transferFee(_tokenIn, _amount);
 
-        ERC20(_tokenIn).approve(quickSwapRouterAddress, swapAmount);
-
         uint256[] memory amounts = getAmounts(swapAmount, _path);
+        ERC20(_tokenIn).approve(quickSwapRouterAddress, amounts[0]);
         QuickSwapRouter(quickSwapRouterAddress).swapExactTokensForTokens(
             amounts[0],
             amounts[amounts.length - 1],
@@ -214,7 +222,7 @@ contract WunderSwapperZeta {
             msg.sender,
             _tokenIn,
             _tokenOut,
-            amounts[0],
+            _amount,
             amounts[amounts.length - 1]
         );
     }
@@ -234,12 +242,12 @@ contract WunderSwapperZeta {
         address _tokenOut,
         address[] memory _path
     ) external {
-        uint256 balance = ERC20(_tokenIn).balanceOf(address(this));
+        uint256 balance = ERC20(_tokenIn).balanceOf(msg.sender);
         swapTokensWithPath(_tokenIn, _tokenOut, balance, _path);
     }
 
     function swapAllTokens(address _tokenIn, address _tokenOut) external {
-        uint256 balance = ERC20(_tokenIn).balanceOf(address(this));
+        uint256 balance = ERC20(_tokenIn).balanceOf(msg.sender);
         swapTokens(_tokenIn, _tokenOut, balance);
     }
 

@@ -32,7 +32,7 @@
 
 ### Zeta - [Docs](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/ZETA.md)
 
-- [WunderSwapperZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/WunderSwapperZeta.sol): 0xD3d1bbA53446F60f7a2FcD3664a398245Fe4A128
+- [WunderSwapperZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/WunderSwapperZeta.sol): 0x6a7ad95F8158F59e524663C648223743DD0695E2
 - [PoolLauncherZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/PoolLauncherZeta.sol): 0xB5Ae136D3817d8116Fce70Ac47e856fc484dafAe
 - [WunderProposalZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/WunderProposalZeta.sol): 0xC90403e7537c0E2b98D4E73109316fCC106E9e7a
 - [PoolConfigZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/PoolConfigZeta.sol): 0xB63D47962319822eABaD71765153FD2c38939d3a

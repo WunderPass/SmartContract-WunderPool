@@ -1,5 +1,8 @@
 const fs = require('fs');
 
+const treasuryAddress = '0x4d2ca400de2fc1b905197995e8b0a05f5fd3ee0d';
+const swapFees = 10;
+
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log(`Deploying contract with the account: ${deployer.address}`);
@@ -7,8 +10,8 @@ async function main() {
   const balance = await deployer.getBalance();
   console.log(`Account balance: ${balance.toString()}`);
 
-  const WunderSwapper = await ethers.getContractFactory('WunderSwapperDelta');
-  const contract = await WunderSwapper.deploy();
+  const WunderSwapper = await ethers.getContractFactory('WunderSwapperZeta');
+  const contract = await WunderSwapper.deploy(treasuryAddress, swapFees);
   console.log(`Token address: ${contract.address}`);
 
   const contractData = {
@@ -17,7 +20,7 @@ async function main() {
   };
 
   fs.writeFileSync(
-    'deployed/WunderSwapperDelta.json',
+    'deployed/WunderSwapperZeta.json',
     JSON.stringify(contractData)
   );
 }

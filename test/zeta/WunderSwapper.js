@@ -87,7 +87,7 @@ describe('WUNDER SWAPPER CONTRACT', () => {
       tokenBalance = await sunMinerToken.balanceOf(trader.address);
       await sunMinerToken
         .connect(trader)
-        .transfer(wunderSwapper.address, tokenBalance);
+        .approve(wunderSwapper.address, tokenBalance);
     });
 
     it('Should revert if Amount is zero', async () => {
@@ -159,7 +159,7 @@ describe('WUNDER SWAPPER CONTRACT', () => {
       smtBalance = await sunMinerToken.balanceOf(trader.address);
       await planetIX
         .connect(trader)
-        .transfer(wunderSwapper.address, planetIXBalance);
+        .approve(wunderSwapper.address, planetIXBalance);
     });
 
     it('Should revert if Amount is zero', async () => {
@@ -256,7 +256,7 @@ describe('WUNDER SWAPPER CONTRACT', () => {
       usdcBalance = await USDC.balanceOf(trader.address);
       linkBalance = await link.balanceOf(trader.address);
       manaBalance = await mana.balanceOf(trader.address);
-      await USDC.connect(trader).transfer(wunderSwapper.address, usdcBalance);
+      await USDC.connect(trader).approve(wunderSwapper.address, usdcBalance);
     });
 
     it('Should swap USDC for LINK', async () => {
