@@ -34,7 +34,7 @@ async function createPool(
     members || [],
     usdc(minInvest ?? 10),
     usdc(maxInvest ?? 20),
-    maxMembers ?? 4,
+    maxMembers ?? 5,
     votingPercent ?? 51,
     votingTime ?? 86400,
     minYesVoters ?? 1
