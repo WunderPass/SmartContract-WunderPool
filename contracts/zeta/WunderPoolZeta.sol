@@ -362,6 +362,19 @@ contract WunderPoolZeta is WunderVaultZeta {
         selfdestruct(payable(members[0]));
     }
 
+    //new by desp
+    function leavePool() public {
+        require(msg.sender == address(this));
+        reqMem(msg.sender);
+        //CHECK IF THERE IS A NFT, IF SO NOT POSSIBLE or IGNORE NFT
+        address[] memory leaver; 
+        leaver[0] = msg.sender;
+        _distributeFullBalanceOfAllTokensEvenly(leaver);
+        _distributeAllMaticEvenly(leaver);
+        _distributeGovTokensOfLeaverToMembers(msg.sender, members);
+        //removeMemberFromPool(member) Maybe not even needed
+    }
+
     function ProposalModule() internal view returns (WunderProposal) {
         return WunderProposal(IPoolLauncher(launcherAddress).wunderProposal());
     }

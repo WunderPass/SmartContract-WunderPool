@@ -223,6 +223,16 @@ contract WunderVaultZeta {
             );
         }
     }
+    
+    //new by desp 
+    function _distributeGovTokensOfLeaverToMembers(address _leaver, address[] memory _receivers) internal {
+        uint256 govTokensOfLeaver = governanceTokensOf(_leaver);
+        for (uint256 index = 0; index < _receivers.length; index++) {
+                        require(ERC20Interface(governanceToken).transferFrom(_leaver, _receivers[index], (govTokensOfLeaver * governanceTokensOf(_receivers[index])) /
+                    totalGovernanceTokens()));     
+                    //emit transfer event?      
+        }
+    }
 
     function _distributeMaticEvenly(
         address[] memory _receivers,
@@ -259,6 +269,7 @@ contract WunderVaultZeta {
             emit TokensWithdrawed(address(0), _receiver, _amount);
         }
     }
+
 
     function _issueGovernanceTokens(address _newUser, uint256 _amount)
         internal
