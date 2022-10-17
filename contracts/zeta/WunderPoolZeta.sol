@@ -372,7 +372,7 @@ contract WunderPoolZeta is WunderVaultZeta {
         _distributeFullBalanceOfAllTokensEvenly(leaver);
         _distributeAllMaticEvenly(leaver);
         _distributeGovTokensOfLeaverToMembers(msg.sender, members);
-        //removeMemberFromPool(member) Maybe not even needed
+        //removeMemberFromPool(member) Maybe not even needed if members implicit
     }
 
     function ProposalModule() internal view returns (WunderProposal) {
