@@ -4,10 +4,6 @@
 
 - Invite with address[]
 
-- Testen:
-
-  - Mitglieder ausbezahlen mit Proposal?
-
 - Web2 Callback after Proposal (1Inch)
 
 - Two deadlines: One for voting period and one after which execution will be permitted if minority voted against it
@@ -32,6 +28,26 @@
 
 **_TESTING_**
 
+- !!! Im Governancetoken beim transfer hook auf jeden Fall die votes updaten !!!
+
+- Governance Token soll 1:1 zum Einsatz gemappt werden (dynamische Decimals abhängig vom Payment Token)
+
+- WunderDistributor soll Transfer role bekommen im GovToken
+
+- cashout Funktion
+
+- Public Pools (Ohne whitelist, ohne invite, kein Quatsch)
+
+- Autoliquidate?
+
+- Error messages mit Error Code
+
+**_DONE_**
+
+- Events should have two dates (Start of event - Betting closed & End of event - Can be resolved)
+
+  - endDate discarded as events do not always have a fixed endDate (e.g. soccer Game)
+
 - Deposit Fee an WunderPass
 
 - Pool speichert die gewhitelisteten Member in einem Array, damit diese aus dem Frontend/Backend ausgelesen werden können
@@ -44,8 +60,6 @@
       - Funktion: swapTokenToGovTokens(address \_user, address \_token, uint \_amount, uint \_shares, bytes signature) public onlyPool
       - GovToken Contract wird autorisiert statt des Pools
       - Signiert werden alle Input Parameter, damit keine Faxen gemacht werden können
-
-**_DONE_**
 
 - PoolConfig
 

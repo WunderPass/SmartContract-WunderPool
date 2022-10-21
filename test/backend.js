@@ -13,32 +13,36 @@ async function createPool(
   launcher,
   user,
   {
-    amount,
+    amount = 10,
     members,
-    minInvest,
-    maxInvest,
+    minInvest = 10,
+    maxInvest = 20,
+    maxMembers = 5,
+    votingPercent = 51,
+    votingTime = 86400,
+    minYesVoters = 1,
+    public = false,
+    autoLiquidate = 0,
+  }
+) {
+  await topUp(user, usdc(amount + 2));
+  await approve(user, launcher.address, usdc(amount));
+  await launcher.createNewPool([
+    'Dorsch Pool',
+    'Dorsch Pool Token',
+    'DPT',
+    usdc(amount),
+    user.address,
+    members || [],
+    usdc(minInvest),
+    usdc(maxInvest),
     maxMembers,
     votingPercent,
     votingTime,
     minYesVoters,
-  }
-) {
-  await topUp(user, usdc((amount ?? 10) + 2));
-  await approve(user, launcher.address, usdc(amount ?? 10));
-  await launcher.createNewPool(
-    'Dorsch Pool',
-    'Dorsch Pool Token',
-    'DPT',
-    usdc(amount ?? 10),
-    user.address,
-    members || [],
-    usdc(minInvest ?? 10),
-    usdc(maxInvest ?? 20),
-    maxMembers ?? 5,
-    votingPercent ?? 51,
-    votingTime ?? 86400,
-    minYesVoters ?? 1
-  );
+    public,
+    autoLiquidate,
+  ]);
 }
 
 async function addToWhiteList(backend, signer, pool, user) {
@@ -177,7 +181,7 @@ async function createSwapProposal(
   const description = 'TOKEN MOON';
   const contractAddresses = [tokenIn, swapper];
   const actions = [
-    'transfer(address,uint256)',
+    'approve(address,uint256)',
     'swapTokens(address,address,uint256)',
   ];
   const params = [
