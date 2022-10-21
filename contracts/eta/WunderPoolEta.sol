@@ -241,7 +241,7 @@ contract WunderPoolEta is WunderVaultEta {
             (success, result) = contractAddress.call{
                 value: transactionValues[index]
             }(callData);
-            require(success, string(abi.encodePacked("315: ", string(result))));
+            require(success, string(abi.encodePacked("314: ", string(result))));
             results[index] = result;
         }
 
@@ -258,7 +258,7 @@ contract WunderPoolEta is WunderVaultEta {
             if (secretWhiteList[keccak256(bytes(_secret))] > 0) {
                 secretWhiteList[keccak256(bytes(_secret))] -= 1;
             } else {
-                require(isWhiteListed(_user), "208: Not On Whitelist");
+                require(isWhiteListed(_user), "207: Not On Whitelist");
             }
 
             reqJoin(_amount, _user);
@@ -275,7 +275,7 @@ contract WunderPoolEta is WunderVaultEta {
         require(
             investOfUser[msg.sender] + _amount <=
                 ConfigModule().maxInvest(address(this)),
-            "209: MaxInvest reached"
+            "208: MaxInvest reached"
         );
         investOfUser[msg.sender] += _amount;
         reqTra(USDC, msg.sender, _amount);
@@ -288,7 +288,7 @@ contract WunderPoolEta is WunderVaultEta {
     }
 
     function _addMember(address _newMember) internal {
-        require(!isMember(_newMember), "205: Already Member");
+        require(!isMember(_newMember), "204: Already Member");
         members.push(_newMember);
         memberLookup[_newMember] = true;
         IPoolLauncher(launcherAddress).addPoolToMembersPools(
@@ -326,7 +326,7 @@ contract WunderPoolEta is WunderVaultEta {
         bytes memory _signature
     ) public {
         reqMem(_user);
-        require(!_secretsUsed[_hashedSecret], "206: Secret Already Used");
+        require(!_secretsUsed[_hashedSecret], "205: Secret Already Used");
         bytes32 message = prefixed(
             keccak256(
                 abi.encodePacked(
@@ -403,11 +403,11 @@ contract WunderPoolEta is WunderVaultEta {
         bytes memory _sig,
         address _usr
     ) internal pure {
-        require(recoverSigner(_msg, _sig) == _usr, "207: Invalid Signature");
+        require(recoverSigner(_msg, _sig) == _usr, "206: Invalid Signature");
     }
 
     function reqMem(address _usr) internal view {
-        require(isMember(_usr), "204: Not a Member");
+        require(isMember(_usr), "203: Not a Member");
     }
 
     function reqJoin(uint256 _amount, address _user) internal view {

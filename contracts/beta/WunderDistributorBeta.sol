@@ -435,7 +435,7 @@ contract WunderDistributorBeta {
         bytes memory _sig,
         address _usr
     ) internal pure {
-        require(recoverSigner(_msg, _sig) == _usr, "207: Invalid Signature");
+        require(recoverSigner(_msg, _sig) == _usr, "206: Invalid Signature");
     }
 
     function splitSignature(bytes memory sig)

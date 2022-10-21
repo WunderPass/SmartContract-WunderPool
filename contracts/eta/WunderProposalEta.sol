@@ -225,10 +225,10 @@ contract WunderProposalEta {
     {
         Proposal storage proposal = pools[_pool].proposals[_proposalId];
         if (proposal.actions.length < 1) {
-            return (false, "309: Proposal does not exist");
+            return (false, "305: Proposal does not exist");
         }
         if (proposal.executed) {
-            return (false, "310: Proposal already executed");
+            return (false, "309: Proposal already executed");
         }
         (
             uint256 yesVotes,
@@ -245,20 +245,20 @@ contract WunderProposalEta {
             memberCount > yesVoters &&
             proposal.deadline >= block.timestamp
         ) {
-            return (false, "311: Not enough Members voted yes");
+            return (false, "310: Not enough Members voted yes");
         }
 
         uint8 votingThreshold = PoolConfig(poolConfig).votingThreshold(_pool);
         uint256 totalVotes = WunderPool(_pool).totalGovernanceTokens();
 
         if (noVotes > ((totalVotes * (100 - votingThreshold)) / 100)) {
-            return (false, "312: Majority voted against execution");
+            return (false, "311: Majority voted against execution");
         }
         if (
             yesVotes < ((totalVotes * votingThreshold) / 100) &&
             proposal.deadline >= block.timestamp
         ) {
-            return (false, "313: Voting still allowed");
+            return (false, "312: Voting still allowed");
         }
 
         uint256 transactionTotal = 0;
@@ -271,7 +271,7 @@ contract WunderProposalEta {
         }
 
         if (transactionTotal > _pool.balance) {
-            return (false, "314: Not enough funds");
+            return (false, "313: Not enough funds");
         }
 
         return (true, "");
