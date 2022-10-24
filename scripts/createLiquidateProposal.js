@@ -1,6 +1,6 @@
 const { createProposal } = require('../test/backend');
 
-const poolAddress = '0x3ad9d892e16a7f66b2e58ea45e223527d3eb565d';
+const poolAddress = 'INSERT_ADDRESS';
 
 async function main() {
   if (poolAddress.length < 42) throw 'Invalid Pool Address';
