@@ -29,7 +29,7 @@ module.exports = {
     },
     mumbai: {
       url: 'https://rpc-mumbai.matic.today',
-      accounts: [`0x${process.env.PRIVATE_KEY_M}`],
+      accounts: [`0x${process.env.PRIVATE_KEY}`],
     },
   },
   mocha: {
