@@ -154,6 +154,21 @@ contract PoolLauncherEta {
         }
     }
 
+    function removePoolFromMembersPools(address _pool, address _member)
+        external
+    {
+        if (WunderPoolEta(payable(_pool)).isMember(_member)) return;
+        for (uint256 i = 0; i < memberPools[_member].length; i++) {
+            if (memberPools[_member][i] == _pool) {
+                delete memberPools[_member][i];
+                memberPools[_member][i] = memberPools[_member][
+                    memberPools[_member].length - 1
+                ];
+                memberPools[_member].pop();
+            }
+        }
+    }
+
     function allPools() public view returns (address[] memory) {
         return launchedPools;
     }

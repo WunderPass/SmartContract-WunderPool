@@ -34,6 +34,9 @@ interface IGovernanceToken {
 interface IPoolLauncher {
     function addPoolToMembersPools(address _pool, address _member) external;
 
+    function removePoolFromMembersPools(address _pool, address _member)
+        external;
+
     function wunderProposal() external view returns (address);
 
     function poolConfig() external view returns (address);

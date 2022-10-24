@@ -96,6 +96,7 @@ contract WunderPoolEta is WunderVaultEta {
         bytes[] result
     );
     event NewMember(address indexed memberAddress, uint256 stake);
+    event CashOut(address indexed memberAddress);
 
     constructor(
         string memory _name,
@@ -372,13 +373,29 @@ contract WunderPoolEta is WunderVaultEta {
 
         reqSig(message, _signature, _user);
 
-        address[] memory leaver;
+        address[] memory leaver = new address[](1);
         leaver[0] = _user;
-        investOfUser[_user] = 0;
 
         _distributeFullBalanceOfAllTokensEvenly(leaver);
         _distributeAllMaticEvenly(leaver);
         _burnGovernanceTokens(_user, governanceTokensOf(_user));
+
+        investOfUser[_user] = 0;
+        memberLookup[_user] = false;
+
+        for (uint256 i = 0; i < members.length; i++) {
+            if (members[i] == _user) {
+                delete members[i];
+                members[i] = members[members.length - 1];
+                members.pop();
+            }
+        }
+        IPoolLauncher(launcherAddress).removePoolFromMembersPools(
+            address(this),
+            _user
+        );
+
+        emit CashOut(_user);
     }
 
     function liquidatePool() public {

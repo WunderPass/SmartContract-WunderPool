@@ -1,15 +1,9 @@
 const chai = require('chai');
 const assertArrays = require('chai-arrays');
 const { createPool, joinPool } = require('../backend');
-const { signMessage } = require('../helpers');
+const { date, signMessage } = require('../helpers');
 chai.use(assertArrays);
 const expect = chai.expect;
-
-const date = (dateStr = null) => {
-  return Math.floor(
-    (dateStr ? Number(new Date(dateStr)) : Number(new Date())) / 1000
-  );
-};
 
 describe('WunderDistributor', () => {
   let distributor, poolLauncher, moritz, gerwin, slava, despot, max, backend;
@@ -340,6 +334,21 @@ describe('WunderDistributor', () => {
               despotBalance
             );
             expect(await govToken.balanceOf(max.address)).to.equal(maxBalance);
+          });
+
+          it('GovernanceToken should update votes as well', async () => {
+            await distributor.connect(moritz).registerParticipant(2, [3, 1]);
+            await distributor.connect(gerwin).registerParticipant(2, [2, 1]);
+            await distributor.connect(slava).registerParticipant(2, [2, 2]);
+            await distributor.connect(despot).registerParticipant(2, [1, 2]);
+            await distributor.connect(max).registerParticipant(2, [0, 2]);
+
+            const prevBalance = await govToken.votesOf(moritz.address);
+            await distributor.determineGame(2);
+
+            expect(await govToken.votesOf(moritz.address)).to.equal(
+              prevBalance.sub(gameStake).add(priceMoney)
+            );
           });
         });
 

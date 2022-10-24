@@ -11,6 +11,7 @@
 
 - [WunderSwapperBeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/beta/WunderSwapperBeta.sol): 0xbD4b2807dDaBF2bCb7A8555D98861A958c11435b
 - [PoolLauncherBeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/beta/PoolLauncherBeta.sol): 0xc484B477BE6c3C58Fe3b4d3ede08BE96f47c5DEb
+- [WunderDistributorBeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/beta/WunderDistributorBeta.sol): 0x1Ec1144ccCDE222449A02288d5eC1C22960CaCDc
 
 ### Gamma
 
@@ -37,3 +38,10 @@
 - [WunderProposalZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/WunderProposalZeta.sol): 0xC90403e7537c0E2b98D4E73109316fCC106E9e7a
 - [PoolConfigZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/PoolConfigZeta.sol): 0xB63D47962319822eABaD71765153FD2c38939d3a
 - [GovernanceTokenLauncherZeta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/zeta/GovernanceTokenLauncherZeta.sol): 0xbA7560522C3d9DbAE7Db1EB3fD2083Ae88FD6BE7
+
+### Eta - [Docs](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/ETA.md)
+
+- [PoolLauncherEta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/eta/PoolLauncherEta.sol): 0x8c3B8456077F0A853c667BF18F4B77E4B3Ca0cB1
+- [WunderProposalEta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/eta/WunderProposalEta.sol): 0x2B0b5B7FB37cA2446af4ADca724224dd1f4d71c6
+- [PoolConfigEta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/eta/PoolConfigEta.sol): 0x230A00cf47110F93462257AE050E292A4fBffF27
+- [GovernanceTokenLauncherEta](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/eta/GovernanceTokenLauncherEta.sol): 0x37cc5E432ba3de42791ef18e6033D78Ee54dC804

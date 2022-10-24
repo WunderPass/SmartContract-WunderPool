@@ -10,10 +10,6 @@
 
 - consider removing openProposalIds in WunderPool
 
-- Perks depending on WunderPass NFT status
-
-  - Early Access mit WP NFT
-
 - Remove Proposals that did not follow through
 
 - WunderPool liquidation should delete it from PoolLauncher
@@ -28,21 +24,21 @@
 
 **_TESTING_**
 
-- !!! Im Governancetoken beim transfer hook auf jeden Fall die votes updaten !!!
+**_DONE_**
 
-- Governance Token soll 1:1 zum Einsatz gemappt werden (dynamische Decimals abhängig vom Payment Token)
-
-- WunderDistributor soll Transfer role bekommen im GovToken
+- Autoliquidate?
 
 - cashout Funktion
 
 - Public Pools (Ohne whitelist, ohne invite, kein Quatsch)
 
-- Autoliquidate?
+- !!! Im Governancetoken beim transfer hook auf jeden Fall die votes updaten !!!
+
+- Governance Token soll 1:1 zum Einsatz gemappt werden (dynamische Decimals abhängig vom Payment Token)
 
 - Error messages mit Error Code
 
-**_DONE_**
+- WunderDistributor soll Transfer role bekommen im GovToken
 
 - Events should have two dates (Start of event - Betting closed & End of event - Can be resolved)
 

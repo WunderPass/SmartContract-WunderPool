@@ -14,11 +14,13 @@ const {
 } = require('../backend');
 const {
   usdc,
+  date,
   usdcBalance,
   usdcAddress,
   matic,
   topUp,
   approve,
+  signMessage,
 } = require('../helpers');
 chai.use(assertArrays);
 const expect = chai.expect;
@@ -52,6 +54,62 @@ describe('POOL JOURNEY', () => {
       poolConfig.address,
       governanceTokenLauncher.address
     );
+  });
+
+  describe('Moritz creates a public Pool', () => {
+    let pool, governanceToken;
+    beforeEach(async () => {
+      await createPool(poolLauncher, moritz, {
+        maxMembers: 2,
+        public: true,
+      });
+      const poolAddress = (await poolLauncher.allPools())[0];
+      pool = await ethers.getContractAt('WunderPoolEta', poolAddress, moritz);
+      const governanceTokenAddress = await pool.governanceToken();
+      governanceToken = await ethers.getContractAt(
+        'PoolGovernanceTokenEta',
+        governanceTokenAddress,
+        moritz
+      );
+    });
+
+    it('Everyone can join the Pool', async () => {
+      await expect(joinPool(backend, gerwin, pool, 10)).to.not.be.reverted;
+      await expect(joinPool(backend, slava, pool, 10)).to.be.revertedWith(
+        '202: Member Limit reached'
+      );
+      expect(await pool.poolMembers()).to.be.containingAllOf([
+        gerwin.address,
+        moritz.address,
+      ]);
+      expect(await governanceToken.balanceOf(moritz.address)).to.equal(
+        await governanceToken.balanceOf(gerwin.address)
+      );
+    });
+  });
+
+  describe('Moritz creates a liquidatable Pool', () => {
+    let pool;
+    beforeEach(async () => {
+      await createPool(poolLauncher, moritz, {
+        autoLiquidate: date() + 3,
+      });
+      const poolAddress = (await poolLauncher.allPools())[0];
+      pool = await ethers.getContractAt('WunderPoolEta', poolAddress, moritz);
+    });
+
+    it('Cant be liquidated before the endDate', async () => {
+      await expect(pool.liquidatePool()).to.be.revertedWith(
+        '111: Cannot be liquidated'
+      );
+    });
+
+    it('Can be liquidated after the endDate', async () => {
+      setTimeout(async () => {
+        await expect(pool.liquidatePool()).to.not.be.reverted;
+        await expect(pool.name()).to.be.reverted;
+      }, 3000);
+    });
   });
 
   describe('Moritz creates a new Pool', () => {
@@ -137,7 +195,7 @@ describe('POOL JOURNEY', () => {
       it('Should fail for invalid min Invest', async () => {
         await expect(
           createPool(poolLauncher, moritz, { minInvest: 0 })
-        ).to.be.revertedWith('Invalid minInvest');
+        ).to.be.revertedWith('106: Invalid minInvest');
       });
 
       it('Should fail for invalid max Invest', async () => {
@@ -163,21 +221,21 @@ describe('POOL JOURNEY', () => {
       it('Should fail for invalid maximum Members', async () => {
         await expect(
           createPool(poolLauncher, moritz, { maxMembers: 0 })
-        ).to.be.revertedWith('Invalid MaxMembers');
+        ).to.be.revertedWith('104: Invalid MaxMembers');
       });
 
       it('Should fail for invalid VotingThreshold', async () => {
         await expect(
           createPool(poolLauncher, moritz, { votingPercent: 101 })
-        ).to.be.revertedWith('Invalid Voting Threshold (0-100)');
+        ).to.be.revertedWith('102: Invalid Voting Threshold (0-100)');
 
         await expect(
           createPool(poolLauncher, moritz, { votingTime: 0 })
-        ).to.be.revertedWith('Invalid Voting Time');
+        ).to.be.revertedWith('103: Invalid Voting Time');
 
         await expect(
           createPool(poolLauncher, moritz, { minYesVoters: 0 })
-        ).to.be.revertedWith('Invalid minYesVoters');
+        ).to.be.revertedWith('105: Invalid minYesVoters');
       });
     });
 
@@ -226,10 +284,10 @@ describe('POOL JOURNEY', () => {
     describe('Pool Config works', () => {
       it('Should apply min & max Invest when joining', async () => {
         await expect(joinPool(backend, gerwin, pool, 9)).to.be.revertedWith(
-          'Stake is lower than minInvest'
+          '200: Stake is lower than minInvest'
         );
         await expect(joinPool(backend, gerwin, pool, 21)).to.be.revertedWith(
-          'Stake is higher than maxInvest'
+          '201: Stake is higher than maxInvest'
         );
       });
 
@@ -240,7 +298,7 @@ describe('POOL JOURNEY', () => {
         await joinPool(backend, slava, pool, 10);
         await joinPool(backend, despot, pool, 10);
         await expect(joinPool(backend, bob, pool, 10)).to.be.revertedWith(
-          'Member Limit reached'
+          '202: Member Limit reached'
         );
       });
 
@@ -272,11 +330,11 @@ describe('POOL JOURNEY', () => {
         );
 
         await expect(pool.executeProposal(0)).to.be.revertedWith(
-          'Not enough Members voted yes'
+          '310: Not enough Members voted yes'
         );
         await voteForUser(backend, gerwin, pool, 0, 1);
         await expect(pool.executeProposal(0)).to.be.revertedWith(
-          'Voting still allowed'
+          '312: Voting still allowed'
         );
         await voteForUser(backend, slava, pool, 0, 1);
         await expect(pool.executeProposal(0)).to.not.be.reverted;
@@ -309,7 +367,7 @@ describe('POOL JOURNEY', () => {
           .reverted;
         await expect(
           joinPool(backend, bob, pool, 10, 'GEHEIM')
-        ).to.be.revertedWith('Not On Whitelist');
+        ).to.be.revertedWith('207: Not On Whitelist');
         await expect(addToWhiteListSecret(backend, moritz, pool, 2, 'GEHEIM'))
           .to.be.reverted;
       });
@@ -349,7 +407,7 @@ describe('POOL JOURNEY', () => {
 
         it('Gerwin cant join twice', async () => {
           await expect(joinPool(backend, gerwin, pool, 10)).to.be.revertedWith(
-            'Already Member'
+            '204: Already Member'
           );
         });
 
@@ -379,7 +437,7 @@ describe('POOL JOURNEY', () => {
           await approve(moritz, pool.address, usdc(15));
           await expect(
             pool.connect(moritz).fundPool(usdc(12))
-          ).to.be.revertedWith('209: MaxInvest reached');
+          ).to.be.revertedWith('208: MaxInvest reached');
         });
 
         it('...And 3% go to the treasury', async () => {
@@ -394,13 +452,13 @@ describe('POOL JOURNEY', () => {
 
         it('Slava cant join because the Pool is too expensive', async () => {
           await expect(joinPool(backend, slava, pool, 9)).to.be.revertedWith(
-            'Stake is lower than minInvest'
+            '200: Stake is lower than minInvest'
           );
         });
 
         it('Bob cant join because he is not whitelisted', async () => {
           await expect(joinPool(backend, bob, pool, 20)).to.be.revertedWith(
-            'Not On Whitelist'
+            '207: Not On Whitelist'
           );
         });
 
@@ -426,7 +484,7 @@ describe('POOL JOURNEY', () => {
             await approve(despot, pool.address, usdc(100));
             await expect(
               pool.connect(backend).joinForUser(usdc(100), despot.address, '')
-            ).to.be.revertedWith('Pool Closed');
+            ).to.be.revertedWith('110: Pool Closed');
           });
 
           it('Gerwin cant increase his stake in the Pool because the pool already made a transaction', async () => {
@@ -434,7 +492,7 @@ describe('POOL JOURNEY', () => {
             await approve(gerwin, pool.address, usdc(100));
             await expect(
               pool.connect(gerwin).fundPool(usdc(100))
-            ).to.be.revertedWith('Pool Closed');
+            ).to.be.revertedWith('110: Pool Closed');
           });
         });
 
@@ -558,7 +616,7 @@ describe('POOL JOURNEY', () => {
             await voteForUser(backend, gerwin, pool, 0, 2);
             await expect(
               voteForUser(backend, gerwin, pool, 0, 2)
-            ).to.be.revertedWith('Member has voted');
+            ).to.be.revertedWith('307: Member has voted');
             expect(
               (await wunderProp.getProposal(pool.address, 0)).noVotes
             ).to.equal(gerwinsShares);
@@ -592,18 +650,18 @@ describe('POOL JOURNEY', () => {
                 ['transfer(address,uint256)'],
                 [abiCoder.encode(['address', 'uint'], [bob.address, usdc(5)])]
               )
-            ).to.be.revertedWith('Not a Member');
+            ).to.be.revertedWith('203: Not a Member');
           });
 
           it('Bob cant vote for Proposals', async () => {
             await expect(
               voteForUser(backend, bob, pool, 0, 2)
-            ).to.be.revertedWith('Only Members can vote');
+            ).to.be.revertedWith('304: Only Members can vote');
           });
 
           it('Proposal cant be executed if no Majority is achieved', async () => {
             await expect(pool.executeProposal(0)).to.be.revertedWith(
-              'Voting still allowed'
+              '312: Voting still allowed'
             );
           });
 
@@ -616,7 +674,7 @@ describe('POOL JOURNEY', () => {
 
           it('Proposal cant be executed if it does not exist', async () => {
             await expect(pool.executeProposal(1)).to.be.revertedWith(
-              'Proposal does not exist'
+              '305: Proposal does not exist'
             );
           });
 
@@ -624,7 +682,7 @@ describe('POOL JOURNEY', () => {
             await voteForUser(backend, gerwin, pool, 0, 2);
             await voteForUser(backend, slava, pool, 0, 2);
             await expect(pool.executeProposal(0)).to.be.revertedWith(
-              'Majority voted against execution'
+              '311: Majority voted against execution'
             );
           });
 
@@ -633,7 +691,7 @@ describe('POOL JOURNEY', () => {
             await voteForUser(backend, slava, pool, 0, 1);
             await pool.executeProposal(0);
             await expect(pool.executeProposal(0)).to.be.revertedWith(
-              'Proposal already executed'
+              '309: Proposal already executed'
             );
           });
         });
@@ -1005,6 +1063,60 @@ describe('POOL JOURNEY', () => {
             expect(
               (await pool.getOwnedNftTokenIds(testNft.address)).length
             ).to.equal(1);
+          });
+        });
+
+        describe('Gerwin wants to leave the Pool', () => {
+          let gerwinsShare, gerwinsUSDC;
+          beforeEach(async () => {
+            const gerwinsGOV = await governanceToken.balanceOf(gerwin.address);
+            const totalGovs = await governanceToken.totalSupply();
+            const poolUsdc = await usdcBalance(pool.address);
+            gerwinsShare = poolUsdc.mul(gerwinsGOV).div(totalGovs);
+            gerwinsUSDC = await usdcBalance(gerwin.address);
+            const signature = await signMessage(
+              gerwin,
+              ['address', 'address', 'uint256'],
+              [gerwin.address, pool.address, 0]
+            );
+            cashoutTx = await pool.cashoutForUser(gerwin.address, signature);
+          });
+
+          it('Transaction emits a CashOut Event', async () => {
+            await expect(cashoutTx)
+              .to.emit(pool, 'CashOut')
+              .withArgs(gerwin.address);
+          });
+
+          it('Gerwin receives USDC for his GovernanceTokens', async () => {
+            expect(await governanceToken.balanceOf(gerwin.address)).to.equal(0);
+            expect(await usdcBalance(gerwin.address)).to.equal(
+              gerwinsUSDC.add(gerwinsShare)
+            );
+          });
+
+          it('Gerwin should be removed from Members', async () => {
+            expect(await pool.poolMembers()).to.not.include(gerwin.address);
+            expect(await pool.isMember(gerwin.address)).to.equal(false);
+          });
+
+          it('The Pool should be removed from Gerwins Pools', async () => {
+            expect(
+              await poolLauncher.poolsOfMember(gerwin.address)
+            ).to.not.include(pool.address);
+          });
+
+          it('Gerwin should be able to join again', async () => {
+            await expect(joinPool(backend, gerwin, pool, 10)).to.not.be
+              .reverted;
+            expect(await governanceToken.balanceOf(gerwin.address)).to.equal(
+              usdc(10)
+            );
+            expect(await pool.isMember(gerwin.address)).to.equal(true);
+            expect(await pool.poolMembers()).to.include(gerwin.address);
+            expect(await poolLauncher.poolsOfMember(gerwin.address)).to.include(
+              pool.address
+            );
           });
         });
 

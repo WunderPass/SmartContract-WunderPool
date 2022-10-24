@@ -11,6 +11,12 @@ function usdc(num) {
   return ethers.utils.parseUnits(`${num}`, 6);
 }
 
+const date = (dateStr = null) => {
+  return Math.floor(
+    (dateStr ? Number(new Date(dateStr)) : Number(new Date())) / 1000
+  );
+};
+
 async function topUp(signer, amount) {
   const WunderSwapper = await ethers.getContractFactory('WunderSwapperGamma');
   const wunderSwapper = await WunderSwapper.deploy();
@@ -44,11 +50,12 @@ async function signMessage(signer, types, params, packed = true) {
 }
 
 module.exports = {
-  usdcAddress: usdcAddress,
-  matic: matic,
-  usdc: usdc,
-  topUp: topUp,
-  approve: approve,
-  usdcBalance: usdcBalance,
-  signMessage: signMessage,
+  usdcAddress,
+  matic,
+  usdc,
+  date,
+  topUp,
+  approve,
+  usdcBalance,
+  signMessage,
 };

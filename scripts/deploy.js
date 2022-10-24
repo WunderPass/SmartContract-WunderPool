@@ -1,5 +1,5 @@
 const fs = require('fs');
-const version = 'Zeta';
+const version = 'Eta';
 const treasuryAddress = '0x4d2ca400de2fc1b905197995e8b0a05f5fd3ee0d';
 const swapFees = 10;
 const entryFees = 30;
@@ -26,27 +26,46 @@ async function main() {
   console.log(`Account balance: ${balance.toString()}`);
 
   // WunderSwapper
-  const WunderSwapper = await ethers.getContractFactory(
-    `WunderSwapper${version}`
-  );
-  const wunderSwapper = await WunderSwapper.deploy(treasuryAddress, swapFees);
-  console.log(`WunderSwapper: ${wunderSwapper.address}`);
+  // const WunderSwapper = await ethers.getContractFactory(
+  //   `WunderSwapper${version}`
+  // );
+  // const wunderSwapper = await WunderSwapper.deploy(treasuryAddress, swapFees);
+  // console.log(`WunderSwapper: ${wunderSwapper.address}`);
 
-  const wunderSwapperData = {
-    address: wunderSwapper.address,
-    abi: wunderSwapper.interface.format('full'),
+  // const wunderSwapperData = {
+  //   address: wunderSwapper.address,
+  //   abi: wunderSwapper.interface.format('full'),
+  // };
+
+  // fs.writeFileSync(
+  //   `deployed/WunderSwapper${version}.json`,
+  //   JSON.stringify(wunderSwapperData)
+  // );
+
+  // WunderDistributor
+  const WunderDistributor = await ethers.getContractFactory(
+    `WunderDistributorBeta`
+  );
+  const wunderDistributor = await WunderDistributor.deploy();
+  console.log(`WunderDistributor: ${wunderDistributor.address}`);
+
+  const wunderDistributorData = {
+    address: wunderDistributor.address,
+    abi: wunderDistributor.interface.format('full'),
   };
 
   fs.writeFileSync(
-    `deployed/WunderSwapper${version}.json`,
-    JSON.stringify(wunderSwapperData)
+    `deployed/WunderDistributorBeta.json`,
+    JSON.stringify(wunderDistributorData)
   );
 
   // GovTokenLauncher
   const GovernanceTokenLauncher = await ethers.getContractFactory(
     `GovernanceTokenLauncher${version}`
   );
-  const governanceTokenLauncher = await GovernanceTokenLauncher.deploy();
+  const governanceTokenLauncher = await GovernanceTokenLauncher.deploy([
+    wunderDistributor.address,
+  ]);
   console.log(`GovernanceTokenLauncher: ${governanceTokenLauncher.address}`);
 
   const governanceTokenLauncherData = {
@@ -113,13 +132,17 @@ async function main() {
   );
 
   // Verify
-  verify(`${wunderSwapper.address} "${treasuryAddress}" "${swapFees}"`);
-  verify(`${governanceTokenLauncher.address}`);
-  verify(`${poolConfig.address} "${treasuryAddress}" "${entryFees}"`);
-  verify(`${wunderProposal.address} "${poolConfig.address}"`);
-  verify(
-    `${poolLauncher.address} "${wunderProposal.address}" "${poolConfig.address}" "${governanceTokenLauncher.address}"`
-  );
+  console.log('Waiting until verification is possible...');
+  setTimeout(() => {
+    // verify(`${wunderSwapper.address} "${treasuryAddress}" "${swapFees}"`);
+    verify(`${wunderDistributor.address}`);
+    verify(`${governanceTokenLauncher.address}`);
+    verify(`${poolConfig.address} "${treasuryAddress}" "${entryFees}"`);
+    verify(`${wunderProposal.address} "${poolConfig.address}"`);
+    verify(
+      `${poolLauncher.address} "${wunderProposal.address}" "${poolConfig.address}" "${governanceTokenLauncher.address}"`
+    );
+  }, 20000);
 }
 
 main()

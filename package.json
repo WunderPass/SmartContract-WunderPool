@@ -13,6 +13,7 @@
     "hardhat": "^2.8.2"
   },
   "dependencies": {
+    "@uma/core": "^2.37.0",
     "chai-arrays": "^2.2.0",
     "hardhat-contract-sizer": "^2.4.0",
     "package.json": "^2.0.1"
