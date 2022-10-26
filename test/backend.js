@@ -174,11 +174,12 @@ async function createSwapProposal(
   tokenIn,
   tokenOut,
   amount,
-  addToPool = false
+  addToPool = false,
+  options = {}
 ) {
   const abiCoder = new ethers.utils.AbiCoder();
-  const title = 'Lets APE into Token';
-  const description = 'TOKEN MOON';
+  const title = options.title || 'Lets APE into Token';
+  const description = options.description || 'TOKEN MOON';
   const contractAddresses = [tokenIn, swapper];
   const actions = [
     'approve(address,uint256)',

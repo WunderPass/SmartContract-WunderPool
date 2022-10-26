@@ -1,12 +1,12 @@
 module.exports = [
   // string name
-  'First Zeta Pool Token',
+  'Erster Eta Pool Token',
   // string symbol
-  'FIR',
+  'EEPT',
   // uint256 _amount
-  '3000000',
+  '1000000',
   // address _creator
-  '0x0D113d629db84c26c56cd225b878BbE3af6C2CF6',
+  '0xe11e61b3A603Fb1d4d208574bfc25cF69177BB0C',
   // address _launcher
-  '0xB5Ae136D3817d8116Fce70Ac47e856fc484dafAe',
+  '0x8c3b8456077f0a853c667bf18f4b77e4b3ca0cb1',
 ];
