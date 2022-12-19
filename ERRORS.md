@@ -63,15 +63,17 @@
 
 ## Distributor Errors (500)
 
-| Code | Error Message               | Description |
-| ---- | --------------------------- | ----------- |
-| 500  | 500: Event does not exist   |             |
-| 501  | 501: Already Participant    |             |
-| 502  | 502: Betting Phase Expired  |             |
-| 503  | 503: Not allowed            |             |
-| 504  | 504: Event has not ended    |             |
-| 505  | 505: Event already resolved |             |
-| 506  | 506: Event not yet resolved |             |
-| 507  | 507: Game already closed    |             |
-| 508  | 508: Not approved           |             |
-| 509  | 509: Insufficient Balance   |             |
+| Code | Error Message                          | Description |
+| ---- | -------------------------------------- | ----------- |
+| 500  | 500: Event does not exist              |             |
+| 501  | 501: Already Participant               |             |
+| 502  | 502: Betting Phase Expired             |             |
+| 503  | 503: Not allowed                       |             |
+| 504  | 504: Event has not ended               |             |
+| 505  | 505: Event already resolved            |             |
+| 506  | 506: Event not yet resolved            |             |
+| 507  | 507: Tournament already closed         |             |
+| 508  | 508: Not approved                      |             |
+| 509  | 509: Insufficient Balance              |             |
+| 510  | 510: Tournament already closed         |             |
+| 511  | 511: Mismatching Games and Predictions |             |

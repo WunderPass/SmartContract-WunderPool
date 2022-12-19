@@ -17,6 +17,7 @@
 
 - [WunderSwapperGamma](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/gamma/WunderSwapperGamma.sol): 0xB2BfcfA4d937ac850edCBeC7BaeC7A1b68f2ccfd
 - [PoolLauncherGamma](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/gamma/PoolLauncherGamma.sol): 0xAE32217Dc2d87c07C0885D69121B968C96d3E693
+- [WunderDistributorGamma](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/contracts/beta/WunderDistributorGamma.sol): 0x391A85d291Faa9626a3F3e6512485A05Ad68C0Df
 
 ### Delta - [Docs](https://github.com/WunderPass/SmartContract-WunderPool/blob/master/DELTA.md)
 

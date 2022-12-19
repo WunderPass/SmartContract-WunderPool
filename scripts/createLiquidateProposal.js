@@ -1,13 +1,17 @@
 const { createProposal } = require('../test/backend');
 
-const poolAddress = 'INSERT_ADDRESS';
+const poolAddress = '0x9b3d8d3a0ec3b2505aea26ad1c941e3ce8bf002d';
 
 async function main() {
   if (poolAddress.length < 42) throw 'Invalid Pool Address';
 
   const [user] = await ethers.getSigners();
 
-  const pool = await ethers.getContractAt(`WunderPoolEta`, poolAddress, user);
+  const pool = await ethers.getContractAt(
+    `WunderPoolEpsilon`,
+    poolAddress,
+    user
+  );
   await pool
     .name()
     .then(async (name) => {

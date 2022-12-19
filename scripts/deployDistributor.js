@@ -8,7 +8,7 @@ async function main() {
   console.log(`Account balance: ${balance.toString()}`);
 
   const WunderDistributor = await ethers.getContractFactory(
-    'WunderDistributorAlpha'
+    'WunderDistributorGamma'
   );
   const contract = await WunderDistributor.deploy();
   console.log(`Token address: ${contract.address}`);
@@ -19,7 +19,7 @@ async function main() {
   };
 
   fs.writeFileSync(
-    'deployed/WunderDistributorAlpha.json',
+    'deployed/WunderDistributorGamma.json',
     JSON.stringify(contractData)
   );
 }
