@@ -68,7 +68,7 @@ interface PoolConfig {
 }
 
 contract WunderVaultEta {
-    address public USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+    address public USDC;
 
     address public launcherAddress;
     address public governanceToken;
@@ -90,8 +90,9 @@ contract WunderVaultEta {
         uint256 amount
     );
 
-    constructor(address _tokenAddress) {
+    constructor(address _tokenAddress, address _usdc) {
         governanceToken = _tokenAddress;
+        USDC = _usdc;
     }
 
     function addToken(

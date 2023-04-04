@@ -106,8 +106,9 @@ contract WunderPoolEta is WunderVaultEta {
         address[] memory _members,
         uint256 _amount,
         bool _public,
-        uint256 _autoLiquidateTs
-    ) WunderVaultEta(_governanceToken) {
+        uint256 _autoLiquidateTs,
+        address _usdc
+    ) WunderVaultEta(_governanceToken, _usdc) {
         name = _name;
         launcherAddress = _launcher;
         investOfUser[_creator] = _amount;

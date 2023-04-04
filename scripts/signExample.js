@@ -17,19 +17,32 @@ async function signMessage(signer, types, params, packed = true) {
 }
 
 async function main() {
-  const [user] = await ethers.getSigners();
-
-  console.log('Add To WhiteList');
-  console.log('Legende: Signer | Pool | Mitglied');
-  await signMessage(
+  const [
     user,
-    ['address', 'address', 'address'],
-    [
-      user.address,
-      '0x5773f52306e33df9704aed3f6fbec759d59a6ca0',
-      '0x7e0b49362897706290b7312D0b0902a1629397D8',
-    ],
-    true
+    a1,
+    a2,
+    a3,
+    a4,
+    a5,
+    a6,
+    a7,
+    a8,
+    a9,
+    a10,
+    a11,
+    a12,
+    a13,
+    a14,
+    a15,
+    a16,
+    a17,
+  ] = await ethers.getSigners();
+  console.log('Signing with', a16.address);
+  await signMessage(
+    a16,
+    ['uint256', 'uint256[]', 'address', 'uint256[][]'],
+    [11, [11], '0x391A85d291Faa9626a3F3e6512485A05Ad68C0Df', [[2, 1]]],
+    false
   );
 
   // await signMessage(user, ['string'], ['Sehr Geiler Dorsch'], true);

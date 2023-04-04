@@ -3,8 +3,8 @@ const {
   topUp,
   approve,
   usdc,
-  usdcBalance,
   usdcAddress,
+  usdcAddressGnosis,
 } = require('./helpers');
 
 require('@nomiclabs/hardhat-waffle');
@@ -23,10 +23,11 @@ async function createPool(
     minYesVoters = 1,
     public = false,
     autoLiquidate = 0,
+    gnosis = false,
   }
 ) {
-  await topUp(user, usdc(amount + 2));
-  await approve(user, launcher.address, usdc(amount));
+  await topUp(user, usdc(amount + 2), gnosis);
+  await approve(user, launcher.address, usdc(amount), gnosis);
   await launcher.createNewPool([
     'Dorsch Pool',
     'Dorsch Pool Token',
@@ -77,9 +78,16 @@ async function addToWhiteListSecret(backend, signer, pool, validCount, secret) {
   return hashedSecret;
 }
 
-async function joinPool(backend, user, pool, amount, secret = '') {
-  await topUp(user, usdc(amount).mul(11).div(10));
-  await approve(user, pool.address, usdc(amount));
+async function joinPool(
+  backend,
+  user,
+  pool,
+  amount,
+  secret = '',
+  gnosis = false
+) {
+  await topUp(user, usdc(amount).mul(11).div(10), gnosis);
+  await approve(user, pool.address, usdc(amount), gnosis);
   await pool.connect(backend).joinForUser(usdc(amount), user.address, secret);
 }
 
@@ -89,16 +97,24 @@ async function createJoinProposal(
   pool,
   govToken,
   amount,
-  shares
+  shares,
+  gnosis = false
 ) {
   const usdcAmount = usdc(amount);
-  await topUp(user, usdcAmount.mul(11).div(10));
-  await approve(user, govToken.address, usdcAmount);
+  await topUp(user, usdcAmount.mul(11).div(10), gnosis);
+  await approve(user, govToken.address, usdcAmount, gnosis);
   const nonce = await govToken.nonces(user.address);
   const signature = await signMessage(
     user,
     ['address', 'address', 'address', 'uint256', 'uint256', 'uint256'],
-    [user.address, govToken.address, usdcAddress, usdcAmount, shares, nonce]
+    [
+      user.address,
+      govToken.address,
+      gnosis ? usdcAddressGnosis : usdcAddress,
+      usdcAmount,
+      shares,
+      nonce,
+    ]
   );
   await pool
     .connect(backend)

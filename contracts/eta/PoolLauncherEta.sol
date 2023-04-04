@@ -14,7 +14,7 @@ interface TokenLauncher {
 }
 
 contract PoolLauncherEta {
-    address public USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+    address public USDC;
     address public wunderProposal;
     address public poolConfig;
     address public governanceTokenLauncher;
@@ -50,11 +50,13 @@ contract PoolLauncherEta {
     constructor(
         address _wunderProposal,
         address _poolConfig,
-        address _governanceTokenLauncher
+        address _governanceTokenLauncher,
+        address _usdc
     ) {
         wunderProposal = _wunderProposal;
         poolConfig = _poolConfig;
         governanceTokenLauncher = _governanceTokenLauncher;
+        USDC = _usdc;
     }
 
     function createNewPool(CreatePoolParams memory params) public {
@@ -101,7 +103,8 @@ contract PoolLauncherEta {
             params.members,
             params.amount,
             params.isPublic,
-            params.autoLiquidateTs
+            params.autoLiquidateTs,
+            USDC
         );
 
         PoolConfig(poolConfig).setupPool(

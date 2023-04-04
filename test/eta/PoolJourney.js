@@ -12,6 +12,7 @@ const {
   delegateVotes,
   revokeVotes,
 } = require('../backend');
+const { deploySwapper } = require('../deployHelpers');
 const {
   usdc,
   date,
@@ -24,6 +25,7 @@ const {
 } = require('../helpers');
 chai.use(assertArrays);
 const expect = chai.expect;
+const gnosis = true;
 
 describe('POOL JOURNEY', () => {
   let poolConfig,
@@ -699,8 +701,12 @@ describe('POOL JOURNEY', () => {
         describe('Users trade Tokens', () => {
           let wunderSwapper, binanceToken;
           beforeEach(async () => {
-            const WS = await ethers.getContractFactory('WunderSwapperEta');
-            wunderSwapper = await WS.deploy(treasury.address, 10);
+            wunderSwapper = await deploySwapper({
+              version: 'Eta',
+              treasury: treasury.address,
+              fee: 10,
+              gnosis,
+            });
             binanceToken = await ethers.getContractAt(
               'TestToken',
               '0x5c4b7CCBF908E64F32e12c6650ec0C96d717f03F',
@@ -1130,8 +1136,12 @@ describe('POOL JOURNEY', () => {
             gerwinUsdcBalance,
             gerwinTokenBalance;
           beforeEach(async () => {
-            const WS = await ethers.getContractFactory('WunderSwapperEta');
-            const swapper = await WS.deploy(treasury.address, 10);
+            const swapper = await deploySwapper({
+              version: 'Eta',
+              treasury: treasury.address,
+              fee: 10,
+              gnosis,
+            });
             binanceToken = await ethers.getContractAt(
               'TestToken',
               '0x5c4b7CCBF908E64F32e12c6650ec0C96d717f03F',

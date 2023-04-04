@@ -1,6 +1,9 @@
+const { deploySwapper } = require('./deployHelpers');
+
 require('@nomiclabs/hardhat-waffle');
 
 const usdcAddress = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174';
+const usdcAddressGnosis = '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83';
 
 function matic(str) {
   str = typeof str == 'string' ? str : `${str}`;
@@ -17,22 +20,35 @@ const date = (dateStr = null) => {
   );
 };
 
-async function topUp(signer, amount) {
-  const WunderSwapper = await ethers.getContractFactory('WunderSwapperGamma');
-  const wunderSwapper = await WunderSwapper.deploy();
-  const maticPrice = await wunderSwapper.getMaticPriceOf(usdcAddress, amount);
+async function topUp(signer, amount, gnosis = false) {
+  const wunderSwapper = await deploySwapper({
+    version: 'Eta',
+    treasury: signer.address,
+    gnosis,
+  });
+  const coinPrice = await wunderSwapper.getCoinPriceOf(
+    gnosis ? usdcAddressGnosis : usdcAddress,
+    amount
+  );
   await wunderSwapper
     .connect(signer)
-    .buyTokens(usdcAddress, { value: maticPrice });
+    .buyTokens(gnosis ? usdcAddressGnosis : usdcAddress, { value: coinPrice });
 }
 
-async function approve(signer, address, amount) {
-  const usdc = await ethers.getContractAt('TestToken', usdcAddress, signer);
+async function approve(signer, address, amount, gnosis = false) {
+  const usdc = await ethers.getContractAt(
+    'TestToken',
+    gnosis ? usdcAddressGnosis : usdcAddress,
+    signer
+  );
   await usdc.connect(signer).approve(address, amount);
 }
 
-async function usdcBalance(address) {
-  const usdc = await ethers.getContractAt('TestToken', usdcAddress);
+async function usdcBalance(address, gnosis = false) {
+  const usdc = await ethers.getContractAt(
+    'TestToken',
+    gnosis ? usdcAddressGnosis : usdcAddress
+  );
   return await usdc.balanceOf(address);
 }
 
@@ -51,6 +67,7 @@ async function signMessage(signer, types, params, packed = true) {
 
 module.exports = {
   usdcAddress,
+  usdcAddressGnosis,
   matic,
   usdc,
   date,

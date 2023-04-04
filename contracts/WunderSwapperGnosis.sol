@@ -60,23 +60,25 @@ interface UniswapFactory {
     function getPair(address, address) external view returns (address);
 }
 
-contract WunderSwapperEta {
+contract WunderSwapperGnosis {
     address public treasury;
     uint256 public feePerMille;
 
-    address internal uniswapRouterAddress;
-    address internal wrappedCoinAddress;
+    address internal quickSwapRouterAddress =
+        0x1C232F01118CB8B424793ae03F870aa7D0ac7f77;
+    address internal wrappedXDaiAddress =
+        0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d;
 
     event BoughtTokens(
         address indexed trader,
         address indexed token,
-        uint256 coinAmount,
+        uint256 maticAmount,
         uint256 tokenAmount
     );
     event SoldTokens(
         address indexed trader,
         address indexed token,
-        uint256 coinAmount,
+        uint256 maticAmount,
         uint256 tokenAmount
     );
     event SwappedTokens(
@@ -87,16 +89,9 @@ contract WunderSwapperEta {
         uint256 amountOut
     );
 
-    constructor(
-        address _treasury,
-        uint256 _fee,
-        address _routerAddress,
-        address _wrappedCoinAddress
-    ) {
+    constructor(address _treasury, uint256 _fee) {
         treasury = _treasury;
         feePerMille = _fee;
-        uniswapRouterAddress = _routerAddress;
-        wrappedCoinAddress = _wrappedCoinAddress;
     }
 
     function getAmounts(uint256 _amount, address[] memory _path)
@@ -105,24 +100,24 @@ contract WunderSwapperEta {
         returns (uint256[] memory amounts)
     {
         return
-            UniswapRouter(uniswapRouterAddress).getAmountsOut(_amount, _path);
+            UniswapRouter(quickSwapRouterAddress).getAmountsOut(_amount, _path);
     }
 
-    function getCoinPriceOf(address _tokenAddress, uint256 _amount)
+    function getXDaiPriceOf(address _tokenAddress, uint256 _amount)
         public
         view
-        returns (uint256 price)
+        returns (uint256 matic)
     {
         address[] memory path = new address[](2);
         path[0] = _tokenAddress;
-        path[1] = wrappedCoinAddress;
+        path[1] = wrappedXDaiAddress;
         return getAmounts(_amount, path)[1];
     }
 
     function getPriceWithPath(uint256 _amount, address[] memory _path)
         public
         view
-        returns (uint256 price)
+        returns (uint256 matic)
     {
         uint256[] memory amounts = getAmounts(_amount, _path);
         return amounts[amounts.length - 1];
@@ -132,7 +127,7 @@ contract WunderSwapperEta {
         address _tokenIn,
         address _tokenOut,
         uint256 _amount
-    ) public view returns (uint256 price) {
+    ) public view returns (uint256 matic) {
         address[] memory path = new address[](2);
         path[0] = _tokenIn;
         path[1] = _tokenOut;
@@ -143,7 +138,7 @@ contract WunderSwapperEta {
         address _tokenIn,
         address _tokenOut,
         uint256 _amount
-    ) public view returns (uint256 price) {
+    ) public view returns (uint256 matic) {
         address[] memory path = getPathFor(_tokenIn, _tokenOut, _amount);
         return getAmounts(_amount, path)[1];
     }
@@ -152,7 +147,7 @@ contract WunderSwapperEta {
         require(msg.value > 0, "NOTHING TO TRADE");
 
         address[] memory path = new address[](2);
-        path[0] = wrappedCoinAddress;
+        path[0] = wrappedXDaiAddress;
         path[1] = _tokenAddress;
 
         uint256 fee = (msg.value * feePerMille) / 1000;
@@ -160,7 +155,7 @@ contract WunderSwapperEta {
         payable(treasury).transfer(fee);
 
         uint256[] memory amounts = getAmounts(residualAmount, path);
-        UniswapRouter(uniswapRouterAddress).swapExactETHForTokens{
+        UniswapRouter(quickSwapRouterAddress).swapExactETHForTokens{
             value: residualAmount
         }(amounts[1], path, msg.sender, block.timestamp + 1200);
         emit BoughtTokens(msg.sender, _tokenAddress, msg.value, amounts[1]);
@@ -176,13 +171,13 @@ contract WunderSwapperEta {
 
         uint256 swapAmount = transferFee(_tokenAddress, _amount);
 
-        ERC20(_tokenAddress).approve(uniswapRouterAddress, swapAmount);
+        ERC20(_tokenAddress).approve(quickSwapRouterAddress, swapAmount);
 
         address[] memory path = new address[](2);
         path[0] = _tokenAddress;
-        path[1] = wrappedCoinAddress;
+        path[1] = wrappedXDaiAddress;
         uint256[] memory amounts = getAmounts(swapAmount, path);
-        UniswapRouter(uniswapRouterAddress).swapExactTokensForETH(
+        UniswapRouter(quickSwapRouterAddress).swapExactTokensForETH(
             amounts[0],
             amounts[1],
             path,
@@ -212,8 +207,8 @@ contract WunderSwapperEta {
         uint256 swapAmount = transferFee(_tokenIn, _amount);
 
         uint256[] memory amounts = getAmounts(swapAmount, _path);
-        ERC20(_tokenIn).approve(uniswapRouterAddress, amounts[0]);
-        UniswapRouter(uniswapRouterAddress).swapExactTokensForTokens(
+        ERC20(_tokenIn).approve(quickSwapRouterAddress, amounts[0]);
+        UniswapRouter(quickSwapRouterAddress).swapExactTokensForTokens(
             amounts[0],
             amounts[amounts.length - 1],
             _path,
@@ -258,34 +253,32 @@ contract WunderSwapperEta {
         address _tokenTwo,
         uint256 _amount
     ) public view returns (address[] memory) {
-        address factoryAddress = UniswapRouter(uniswapRouterAddress).factory();
+        address factoryAddress = UniswapRouter(quickSwapRouterAddress)
+            .factory();
         address pairAddress = UniswapFactory(factoryAddress).getPair(
             _tokenOne,
             _tokenTwo
         );
 
-        address[] memory pathViaNativeCoin = new address[](3);
-        pathViaNativeCoin[0] = _tokenOne;
-        pathViaNativeCoin[1] = wrappedCoinAddress;
-        pathViaNativeCoin[2] = _tokenTwo;
+        address[] memory maticPath = new address[](3);
+        maticPath[0] = _tokenOne;
+        maticPath[1] = wrappedXDaiAddress;
+        maticPath[2] = _tokenTwo;
 
         if (pairAddress == address(0)) {
-            return pathViaNativeCoin;
+            return maticPath;
         } else {
             address[] memory directPath = new address[](2);
             directPath[0] = _tokenOne;
             directPath[1] = _tokenTwo;
-            uint256[] memory nativeCoinAmounts = getAmounts(
-                _amount,
-                pathViaNativeCoin
-            );
+            uint256[] memory maticAmounts = getAmounts(_amount, maticPath);
             uint256[] memory directAmounts = getAmounts(_amount, directPath);
 
             if (
-                nativeCoinAmounts[nativeCoinAmounts.length - 1] >
+                maticAmounts[maticAmounts.length - 1] >
                 directAmounts[directAmounts.length - 1]
             ) {
-                return pathViaNativeCoin;
+                return maticPath;
             } else {
                 return directPath;
             }
